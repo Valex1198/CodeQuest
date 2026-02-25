@@ -1,0 +1,17 @@
+node_modules/
+postgres-data/
+codequest_backups/
+piston_data/
+piston_storage/
+piston-isolate/
+box/
+judge0_box/
+.env
+*.log
+
+# Large Assets
+*.mp4
+*.rar
+*.zip
+*.7z
+*.iso

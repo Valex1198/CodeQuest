@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What is the correct way to print 'Hello World' in Python?",
+    "answers": ["A. echo('Hello World')", "B. System.out.println('Hello World')", "C. print('Hello World')", "D. cout << 'Hello World';"],
+    "correct": 2
+  },
+  {
+    "question": "Which symbol is used to indicate a single-line comment in C++?",
+    "answers": ["A. //", "B. #", "C. <!-- -->", "D. /* */"],
+    "correct": 0
+  },
+  {
+    "question": "In Java, which keyword is used to create a subclass?",
+    "answers": ["A. extends", "B. inherits", "C. implements", "D. sub"],
+    "correct": 0
+  },
+  {
+    "question": "Which of the following is NOT a valid Python data type?",
+    "answers": ["A. list", "B. dictionary", "C. tuple", "D. arraylist"],
+    "correct": 3
+  },
+  {
+    "question": "In C++, what does the 'new' keyword do?",
+    "answers": ["A. Creates a new variable", "B. Allocates memory dynamically", "C. Declares a constant", "D. Defines a namespace"],
+    "correct": 1
+  },
+  {
+    "question": "What is the entry point of a Java program?",
+    "answers": ["A. start()", "B. init()", "C. main()", "D. begin()"],
+    "correct": 2
+  },
+  {
+    "question": "Which of the following is used to define a function in Python?",
+    "answers": ["A. func", "B. define", "C. def", "D. function"],
+    "correct": 2
+  },
+  {
+    "question": "Which header file is needed for input and output in C++?",
+    "answers": ["A. stdio.h", "B. iostream", "C. conio.h", "D. string.h"],
+    "correct": 1
+  },
+  {
+    "question": "In Java, what is the default value of an uninitialized boolean variable?",
+    "answers": ["A. true", "B. false", "C. null", "D. 0"],
+    "correct": 1
+  },
+  {
+    "question": "What is the output of: print(2 ** 3) in Python?",
+    "answers": ["A. 5", "B. 6", "C. 8", "D. 9"],
+    "correct": 2
+  }
+]

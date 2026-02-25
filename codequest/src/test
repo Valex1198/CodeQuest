@@ -1,0 +1,4 @@
+# Submit a code snippet
+curl -X POST http://localhost:2358/submissions?base64_encoded=false \
+-H "Content-Type: application/json" \
+-d '{"language_id":52,"source_code":"print(\"Hello Judge0\")"}'

@@ -1,0 +1,276 @@
+import { useAuth } from "../../AuthContext";
+import { useState, useEffect } from "react";
+
+export default function BattleArena() {
+  const { user } = useAuth();
+
+  const [playerHealth, setPlayerHealth] = useState(100);
+  const [bossHealth, setBossHealth] = useState(100);
+  const [currentAnswer, setCurrentAnswer] = useState("");
+
+  // Gun & bullet positions
+  const [gunOffsetX, setGunOffsetX] = useState(30);
+  const [bulletStartLeft, setBulletStartLeft] = useState(130);
+  const [bulletStartBottom, setBulletStartBottom] = useState(62);
+  const [bulletDistance, setBulletDistance] = useState(250);
+
+  // Gun & bullet sizes
+  const [gunWidth, setGunWidth] = useState(48);
+  const [gunHeight, setGunHeight] = useState(24);
+  const [bulletWidth, setBulletWidth] = useState(24);
+  const [bulletHeight, setBulletHeight] = useState(24);
+
+  // Bullet test animation
+  const [bulletTravelTest, setBulletTravelTest] = useState(false);
+
+  // Admin check
+  const isAdmin = user?.role === "admin";
+
+  // Load saved admin settings on mount
+  useEffect(() => {
+    if (!isAdmin) return;
+    const saved = localStorage.getItem("arenaSettings");
+    if (saved) {
+      const s = JSON.parse(saved);
+      setGunOffsetX(s.gunOffsetX);
+      setGunWidth(s.gunWidth);
+      setGunHeight(s.gunHeight);
+      setBulletStartLeft(s.bulletStartLeft);
+      setBulletStartBottom(s.bulletStartBottom);
+      setBulletWidth(s.bulletWidth);
+      setBulletHeight(s.bulletHeight);
+      setBulletDistance(s.bulletDistance);
+    }
+  }, [isAdmin]);
+
+  const quiz = {
+    question: "What keyword declares a variable in Java?",
+    answer: "int",
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (currentAnswer.trim().toLowerCase() === quiz.answer.toLowerCase()) {
+      setBossHealth((prev) => Math.max(prev - 20, 0));
+    } else {
+      setPlayerHealth((prev) => Math.max(prev - 15, 0));
+      alert("❌ Wrong! Boss hits you.");
+    }
+
+    setCurrentAnswer("");
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-6">
+      <h1 className="text-4xl text-yellow-400 mb-8 glow-text">Code Battle Quiz</h1>
+
+      {/* Arena */}
+      <div className="w-full max-w-4xl h-96 relative rounded-3xl border-4 border-purple-600 overflow-hidden flex justify-around items-end mb-6">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-400 via-blue-200 to-blue-100"></div>
+
+        {/* Grass */}
+        <div
+          className="absolute bottom-0 w-full h-24"
+          style={{
+            backgroundImage: "url('/javatileset/grass_tileset.png')",
+            backgroundRepeat: "repeat-x",
+            backgroundSize: "auto 100%",
+          }}
+        ></div>
+
+        {/* Player */}
+        {user?.avatar && (
+          <div className="absolute bottom-24 left-16 z-10">
+            <img
+              src={user.avatar}
+              alt="Player"
+              className="w-20 h-20 rounded-full border-2 border-yellow-400"
+            />
+
+            {/* Gun */}
+            <img
+              src="/javatileset/gunfire.gif"
+              alt="Gun"
+              className="absolute top-1/2 left-1/2 opacity-100"
+              style={{
+                width: `${gunWidth}px`,
+                height: `${gunHeight}px`,
+                transform: `translate(-50%, -50%) translateX(${gunOffsetX}px)`,
+              }}
+            />
+
+            {/* Bullet */}
+            <img
+              src="/javatileset/bullet.gif"
+              alt="Bullet"
+              className="absolute"
+              style={{
+                width: `${bulletWidth}px`,
+                height: `${bulletHeight}px`,
+                bottom: `${bulletStartBottom}px`,
+                left: `${bulletStartLeft}px`,
+                transition: bulletTravelTest ? "transform 0.7s linear" : "none",
+                transform: bulletTravelTest
+                  ? `translateX(${bulletDistance}px)`
+                  : "translateX(0)",
+              }}
+            />
+          </div>
+        )}
+
+        {/* Boss */}
+        <div className="absolute z-10" style={{ bottom: "96px", right: "40px" }}>
+          <img
+            src="/javatileset/boss.webp"
+            alt="Boss"
+            className="w-28 h-28 object-contain"
+          />
+        </div>
+      </div>
+
+      {/* Quiz */}
+      <div className="w-full max-w-2xl bg-gray-800 p-6 rounded-2xl text-center shadow-lg mb-4">
+        <p className="text-lg mb-4">{quiz.question}</p>
+        <form onSubmit={handleSubmit} className="flex gap-2 justify-center">
+          <input
+            type="text"
+            value={currentAnswer}
+            onChange={(e) => setCurrentAnswer(e.target.value)}
+            className="p-2 rounded-lg w-2/3 text-black"
+            placeholder="Type your answer..."
+          />
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 p-2 rounded-lg font-bold text-white"
+          >
+            Submit
+          </button>
+        </form>
+        <div className="flex justify-around mt-4 text-white">
+          <span>Player HP: {playerHealth}</span>
+          <span>Boss HP: {bossHealth}</span>
+        </div>
+      </div>
+
+      {/* Admin-only: Position & size sliders */}
+      {isAdmin && (
+        <div className="w-full max-w-2xl bg-gray-800 p-4 rounded-2xl text-white mb-4">
+          <p className="font-bold mb-2">Admin: Adjust Gun & Bullet</p>
+          <div className="flex flex-col gap-2">
+            <label>
+              Gun X Offset: {gunOffsetX}px
+              <input
+                type="range"
+                min="0"
+                max="200"
+                value={gunOffsetX}
+                onChange={(e) => setGunOffsetX(Number(e.target.value))}
+              />
+            </label>
+            <label>
+              Gun Width: {gunWidth}px
+              <input
+                type="range"
+                min="20"
+                max="120"
+                value={gunWidth}
+                onChange={(e) => setGunWidth(Number(e.target.value))}
+              />
+            </label>
+            <label>
+              Gun Height: {gunHeight}px
+              <input
+                type="range"
+                min="12"
+                max="60"
+                value={gunHeight}
+                onChange={(e) => setGunHeight(Number(e.target.value))}
+              />
+            </label>
+
+            <label>
+              Bullet Start Left: {bulletStartLeft}px
+              <input
+                type="range"
+                min="0"
+                max="400"
+                value={bulletStartLeft}
+                onChange={(e) => setBulletStartLeft(Number(e.target.value))}
+              />
+            </label>
+            <label>
+              Bullet Start Bottom: {bulletStartBottom}px
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={bulletStartBottom}
+                onChange={(e) => setBulletStartBottom(Number(e.target.value))}
+              />
+            </label>
+            <label>
+              Bullet Width: {bulletWidth}px
+              <input
+                type="range"
+                min="12"
+                max="60"
+                value={bulletWidth}
+                onChange={(e) => setBulletWidth(Number(e.target.value))}
+              />
+            </label>
+            <label>
+              Bullet Height: {bulletHeight}px
+              <input
+                type="range"
+                min="12"
+                max="60"
+                value={bulletHeight}
+                onChange={(e) => setBulletHeight(Number(e.target.value))}
+              />
+            </label>
+            <label>
+              Bullet Distance: {bulletDistance}px
+              <input
+                type="range"
+                min="50"
+                max="800"
+                value={bulletDistance}
+                onChange={(e) => setBulletDistance(Number(e.target.value))}
+              />
+            </label>
+
+            {/* Test bullet travel */}
+            <button
+              onClick={() => setBulletTravelTest(!bulletTravelTest)}
+              className="bg-blue-600 hover:bg-blue-700 p-2 rounded text-white mt-2"
+            >
+              Test Bullet Travel
+            </button>
+
+            {/* Save positions */}
+            <button
+              onClick={() => {
+                const settings = {
+                  gunOffsetX,
+                  gunWidth,
+                  gunHeight,
+                  bulletStartLeft,
+                  bulletStartBottom,
+                  bulletWidth,
+                  bulletHeight,
+                  bulletDistance,
+                };
+                localStorage.setItem("arenaSettings", JSON.stringify(settings));
+                alert("✅ Positions saved!");
+              }}
+              className="bg-green-600 hover:bg-green-700 p-2 rounded text-white mt-2"
+            >
+              Save Positions
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

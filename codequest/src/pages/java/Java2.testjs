@@ -1,0 +1,163 @@
+import { useAuth } from "../../AuthContext";
+import { useState } from "react";
+
+export default function BattleArena() {
+  const { user } = useAuth();
+
+  const [playerHealth, setPlayerHealth] = useState(100);
+  const [bossHealth, setBossHealth] = useState(100);
+  const [currentAnswer, setCurrentAnswer] = useState("");
+
+  // Gun properties (fixed)
+  const gunOffsetX = 72;
+  const gunWidth = 120;
+  const gunHeight = 60;
+
+  // Bullet permanent properties
+  const bulletStartX = 125;
+  const bulletStartY = 32;
+  const bulletEndX = 698;
+  const bulletEndY = 32;
+  const bulletWidth = 44;
+  const bulletHeight = 48;
+  const bulletDelay = 2; // seconds
+
+  // Controls bullet animation
+  const [bulletTravel, setBulletTravel] = useState(false);
+  // Controls gun visibility
+  const [gunVisible, setGunVisible] = useState(false);
+
+  const quiz = {
+    question: "What keyword declares a variable in Java?",
+    answer: "int",
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (currentAnswer.trim().toLowerCase() === quiz.answer.toLowerCase()) {
+      setBossHealth((prev) => Math.max(prev - 20, 0));
+      fireBullet();
+    } else {
+      setPlayerHealth((prev) => Math.max(prev - 15, 0));
+      alert("❌ Wrong! Boss hits you.");
+    }
+
+    setCurrentAnswer("");
+  };
+
+  // Fires the bullet and shows gun for a longer duration (0.6s)
+  const fireBullet = () => {
+    setGunVisible(true);      // show gun briefly
+    setBulletTravel(false);   // reset bullet position
+
+    const bulletEl = document.getElementById("bullet");
+    if (bulletEl) void bulletEl.offsetWidth; // force reflow
+
+    // Hide gun after 0.6s for slower firing
+    setTimeout(() => setGunVisible(false), 600);
+
+    setBulletTravel(true);    // start bullet animation
+    // Reset bullet after animation
+    setTimeout(() => setBulletTravel(false), bulletDelay * 1000 + 50);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-6">
+      <h1 className="text-4xl text-yellow-400 mb-8 glow-text">Code Battle Quiz</h1>
+
+      {/* Arena */}
+      <div className="w-full max-w-4xl h-96 relative rounded-3xl border-4 border-purple-600 overflow-hidden flex justify-around items-end mb-6">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-400 via-blue-200 to-blue-100"></div>
+
+        {/* Grass */}
+        <div
+          className="absolute bottom-0 w-full h-24"
+          style={{
+            backgroundImage: "url('/javatileset/grass_tileset.png')",
+            backgroundRepeat: "repeat-x",
+            backgroundSize: "auto 100%",
+          }}
+        ></div>
+
+        {/* Player */}
+        {user?.avatar && (
+          <div className="absolute bottom-24 left-16 z-10">
+            <img
+              src={user.avatar}
+              alt="Player"
+              className="w-20 h-20 rounded-full border-2 border-yellow-400"
+            />
+
+            {/* Gun */}
+            {gunVisible && (
+              <img
+                src="/javatileset/gunfire.gif"
+                alt="Gun"
+                className="absolute z-20"
+                style={{
+                  width: `${gunWidth}px`,
+                  height: `${gunHeight}px`,
+                  bottom: `${gunHeight / 4}px`,
+                  left: `${gunOffsetX}px`,
+                }}
+              />
+            )}
+
+            {/* Bullet */}
+            <img
+              id="bullet"
+              src="/javatileset/bullet.gif"
+              alt="Bullet"
+              className="absolute z-30"
+              style={{
+                width: `${bulletWidth}px`,
+                height: `${bulletHeight}px`,
+                left: `${bulletStartX}px`,
+                bottom: `${bulletStartY}px`,
+                transition: `transform ${bulletDelay}s linear`,
+                transform: bulletTravel
+                  ? `translate(${bulletEndX - bulletStartX}px, ${bulletEndY - bulletStartY}px)`
+                  : "translate(0px,0px)",
+                opacity: bulletTravel ? 1 : 0,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Boss */}
+        <div className="absolute z-10" style={{ bottom: "96px", right: "40px" }}>
+          <img
+            src="/javatileset/boss.webp"
+            alt="Boss"
+            className="w-28 h-28 object-contain"
+          />
+        </div>
+      </div>
+
+      {/* Quiz */}
+      <div className="w-full max-w-2xl bg-gray-800 p-6 rounded-2xl text-center shadow-lg mb-4">
+        <p className="text-lg mb-4">{quiz.question}</p>
+        <form onSubmit={handleSubmit} className="flex gap-2 justify-center">
+          <input
+            type="text"
+            value={currentAnswer}
+            onChange={(e) => setCurrentAnswer(e.target.value)}
+            className="p-2 rounded-lg w-2/3 text-black"
+            placeholder="Type your answer..."
+          />
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 p-2 rounded-lg font-bold text-white"
+          >
+            Submit
+          </button>
+        </form>
+        <div className="flex justify-around mt-4 text-white">
+          <span>Player HP: {playerHealth}</span>
+          <span>Boss HP: {bossHealth}</span>
+        </div>
+      </div>
+    </div>
+  );
+}

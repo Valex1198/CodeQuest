@@ -1,0 +1,13 @@
+# ----------------------
+# Custom Piston Dockerfile for Windows
+# ----------------------
+FROM ghcr.io/engineer-man/piston:latest
+
+# Set the working directory to the writable volume
+WORKDIR /piston
+
+# Allow remote images
+ENV PISTON_ALLOW_REMOTE_IMAGES=true
+
+# Default command
+CMD ["./run"]

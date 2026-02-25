@@ -1,0 +1,266 @@
+{
+  "level1": [
+    {
+      "question": "What is the correct way to print 'Hello World' in Python?",
+      "answers": ["A. echo('Hello World')", "B. print('Hello World')", "C. System.out.println('Hello World')", "D. printf('Hello World')"],
+      "correct": 1
+    },
+    {
+      "question": "Which symbol is used for a single-line comment in Python?",
+      "answers": ["A. //", "B. /* */", "C. #", "D. <!-- -->"],
+      "correct": 2
+    },
+    {
+      "question": "Which data type represents whole numbers in Python?",
+      "answers": ["A. float", "B. int", "C. str", "D. bool"],
+      "correct": 1
+    },
+    {
+      "question": "How do you create a variable in Python?",
+      "answers": ["A. var x = 5", "B. int x = 5", "C. x := 5", "D. x = 5"],
+      "correct": 3
+    },
+    {
+      "question": "Which of the following is a valid Python list?",
+      "answers": ["A. (1, 2, 3)", "B. [1, 2, 3]", "C. {1, 2, 3}", "D. <1, 2, 3>"],
+      "correct": 1
+    },
+    {
+      "question": "What is the output of: print(3 * 2)?",
+      "answers": ["A. 5", "B. 6", "C. 9", "D. 32"],
+      "correct": 1
+    },
+    {
+      "question": "What function gets user input?",
+      "answers": ["A. read()", "B. scan()", "C. input()", "D. get()"],
+      "correct": 2
+    },
+    {
+      "question": "Which of the following is a string?",
+      "answers": ["A. 10.5", "B. 'hello'", "C. True", "D. 100"],
+      "correct": 1
+    },
+    {
+      "question": "What does len() return?",
+      "answers": ["A. The size of memory", "B. The length of a value", "C. A random number", "D. The system time"],
+      "correct": 1
+    },
+    {
+      "question": "What is the file extension for Python files?",
+      "answers": ["A. .jav", "B. .exe", "C. .cpp", "D. .py"],
+      "correct": 3
+    }
+  ],
+
+  "level2": [
+    {
+      "question": "Which keyword defines a function in Python?",
+      "answers": ["A. function", "B. define", "C. def", "D. fun"],
+      "correct": 2
+    },
+    {
+      "question": "Which structure is used to store key-value pairs?",
+      "answers": ["A. list", "B. tuple", "C. dictionary", "D. set"],
+      "correct": 2
+    },
+    {
+      "question": "What is the correct if statement syntax?",
+      "answers": ["A. if x > 5 then:", "B. if (x > 5):", "C. if x > 5:", "D. if x > 5"],
+      "correct": 2
+    },
+    {
+      "question": "Which loop repeats until a condition becomes false?",
+      "answers": ["A. repeat loop", "B. do loop", "C. while loop", "D. for loop"],
+      "correct": 2
+    },
+    {
+      "question": "How do you append an item to a list?",
+      "answers": ["A. list.add()", "B. list.push()", "C. list.append()", "D. list.insert()"],
+      "correct": 2
+    },
+    {
+      "question": "What is the output of: type('hello')?",
+      "answers": ["A. str", "B. 'string'", "C. type", "D. <class 'str'>"],
+      "correct": 3
+    },
+    {
+      "question": "What is the result of: 10 // 3?",
+      "answers": ["A. 3.3", "B. 4", "C. 3", "D. 2"],
+      "correct": 2
+    },
+    {
+      "question": "Which operator checks equality?",
+      "answers": ["A. =", "B. ==", "C. equals", "D. ==="],
+      "correct": 1
+    },
+    {
+      "question": "Which creates a tuple?",
+      "answers": ["A. [1, 2, 3]", "B. {1, 2, 3}", "C. (1, 2, 3)", "D. <1, 2, 3>"],
+      "correct": 2
+    },
+    {
+      "question": "Which converts a string to an integer?",
+      "answers": ["A. int()", "B. toInt()", "C. number()", "D. convert()"],
+      "correct": 0
+    }
+  ],
+
+  "level3": [
+    {
+      "question": "What keyword handles exceptions?",
+      "answers": ["A. catch", "B. except", "C. handle", "D. rescue"],
+      "correct": 1
+    },
+    {
+      "question": "What is the correct 'for loop' format?",
+      "answers": ["A. for x to items:", "B. foreach x in items:", "C. for x in items:", "D. loop x items:"],
+      "correct": 2
+    },
+    {
+      "question": "Which function returns the maximum value?",
+      "answers": ["A. high()", "B. max()", "C. top()", "D. upper()"],
+      "correct": 1
+    },
+    {
+      "question": "What does append() do?",
+      "answers": ["A. Adds item at the start", "B. Removes last item", "C. Adds item at the end", "D. Sorts the list"],
+      "correct": 2
+    },
+    {
+      "question": "Which keyword creates a class?",
+      "answers": ["A. struct", "B. class", "C. object", "D. type"],
+      "correct": 1
+    },
+    {
+      "question": "What is __init__() used for?",
+      "answers": ["A. Destroy objects", "B. Initialize new objects", "C. Import modules", "D. Return values"],
+      "correct": 1
+    },
+    {
+      "question": "Which operator concatenates strings?",
+      "answers": ["A. &", "B. +", "C. *", "D. %"],
+      "correct": 1
+    },
+    {
+      "question": "What is the result of: len([1,2,3,4])?",
+      "answers": ["A. 3", "B. 4", "C. 5", "D. Error"],
+      "correct": 1
+    },
+    {
+      "question": "What module is used for random numbers?",
+      "answers": ["A. numbers", "B. random", "C. rand", "D. math"],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword imports modules?",
+      "answers": ["A. module", "B. import", "C. load", "D. include"],
+      "correct": 1
+    }
+  ],
+
+  "level4": [
+    {
+      "question": "What does the 'pass' keyword do?",
+      "answers": ["A. Skips execution", "B. Throws an error", "C. Returns a value", "D. Stops a loop"],
+      "correct": 0
+    },
+    {
+      "question": "Which method removes a list item by value?",
+      "answers": ["A. pop()", "B. erase()", "C. remove()", "D. cut()"],
+      "correct": 2
+    },
+    {
+      "question": "What is inheritance in Python?",
+      "answers": ["A. Copying files", "B. Getting properties from another class", "C. Deleting an object", "D. Creating variables"],
+      "correct": 1
+    },
+    {
+      "question": "What is polymorphism?",
+      "answers": ["A. Having many forms", "B. Memory allocation", "C. Data protection", "D. Overwriting files"],
+      "correct": 0
+    },
+    {
+      "question": "Which method returns all dictionary keys?",
+      "answers": ["A. keys()", "B. allKeys()", "C. getKeys()", "D. values()"],
+      "correct": 0
+    },
+    {
+      "question": "What does range(5) generate?",
+           "answers": ["A. 1–5", "B. 0–4", "C. 0–5", "D. 1–4"],
+      "correct": 1
+    },
+    {
+      "question": "What does break do?",
+      "answers": ["A. Ends loop", "B. Skips loop", "C. Restarts loop", "D. Pauses loop"],
+      "correct": 0
+    },
+    {
+      "question": "What is encapsulation?",
+      "answers": ["A. Hiding implementation details", "B. Extending classes", "C. Sorting data", "D. Creating objects"],
+      "correct": 0
+    },
+    {
+      "question": "What does isinstance() check?",
+      "answers": ["A. Memory size", "B. Variable type", "C. Code errors", "D. File format"],
+      "correct": 1
+    },
+    {
+      "question": "How do you open a file for writing?",
+      "answers": ["A. open('file','out')", "B. open('file','write')", "C. open('file','w')", "D. write.open('file')"],
+      "correct": 2
+    }
+  ],
+
+  "level5": [
+    {
+      "question": "What is a lambda function?",
+      "answers": ["A. A deleted function", "B. A named function", "C. An anonymous inline function", "D. A class method"],
+      "correct": 2
+    },
+    {
+      "question": "What is recursion?",
+      "answers": ["A. Looping forever", "B. A function calling itself", "C. A syntax error", "D. A type conversion"],
+      "correct": 1
+    },
+    {
+      "question": "Which operator unpacks lists?",
+      "answers": ["A. &", "B. *", "C. ->", "D. =="],
+      "correct": 1
+    },
+    {
+      "question": "What is the purpose of decorators?",
+      "answers": ["A. Beautify code", "B. Modify functions", "C. Remove functions", "D. Create files"],
+      "correct": 1
+    },
+    {
+      "question": "Which module handles date and time?",
+      "answers": ["A. math", "B. datetime", "C. calendar", "D. time"],
+      "correct": 1
+    },
+    {
+      "question": "What does yield do?",
+      "answers": ["A. Returns a generator", "B. Stops the program", "C. Exits a loop", "D. Prints output"],
+      "correct": 0
+    },
+    {
+      "question": "What is a generator?",
+      "answers": ["A. A value holder", "B. An iterator created with yield", "C. A file reader", "D. A math function"],
+      "correct": 1
+    },
+    {
+      "question": "What is pickling?",
+      "answers": ["A. Saving objects", "B. Encrypting strings", "C. Compressing files", "D. Debugging code"],
+      "correct": 0
+    },
+    {
+      "question": "Which keyword deletes objects?",
+      "answers": ["A. erase", "B. del", "C. remove", "D. destroy"],
+      "correct": 1
+    },
+    {
+      "question": "Which method returns an iterator from an iterable?",
+      "answers": ["A. it()", "B. next()", "C. iter()", "D. loop()"],
+      "correct": 2
+    }
+  ]
+}

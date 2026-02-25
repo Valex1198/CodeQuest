@@ -1,0 +1,286 @@
+{
+  "level1": [
+    {
+      "question": "Which symbol begins a single-line comment in C++?",
+      "answers": ["A. //", "B. /*", "C. #", "D. <!--"],
+      "correct": 0
+    },
+    {
+      "question": "Which header is required for input/output in C++?",
+      "answers": ["A. stdio.h", "B. iostream", "C. conio.h", "D. string.h"],
+      "correct": 1
+    },
+    {
+      "question": "Which operator is used for insertion in output streams?",
+      "answers": ["A. >>", "B. <<", "C. ::", "D. **"],
+      "correct": 1
+    },
+    {
+      "question": "Which function is the starting point of a C++ program?",
+      "answers": ["A. run()", "B. execute()", "C. start()", "D. main()"],
+      "correct": 3
+    },
+    {
+      "question": "Which keyword declares a variable?",
+      "answers": ["A. var", "B. let", "C. define", "D. int"],
+      "correct": 3
+    },
+    {
+      "question": "Which data type stores decimal values?",
+      "answers": ["A. int", "B. float", "C. char", "D. bool"],
+      "correct": 1
+    },
+    {
+      "question": "Which operator assigns a value?",
+      "answers": ["A. ==", "B. =", "C. ===", "D. :="],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword is used to create a constant?",
+      "answers": ["A. final", "B. constant", "C. const", "D. static"],
+      "correct": 2
+    },
+    {
+      "question": "Which keyword includes libraries?",
+      "answers": ["A. include", "B. #using", "C. #import", "D. #include"],
+      "correct": 3
+    },
+    {
+      "question": "Which command prints to the console?",
+      "answers": ["A. print()", "B. console.log()", "C. cout <<", "D. echo"],
+      "correct": 2
+    }
+  ],
+
+  "level2": [
+    {
+      "question": "Which operator is used for reading input?",
+      "answers": ["A. <<", "B. >>", "C. //", "D. &"],
+      "correct": 1
+    },
+    {
+      "question": "Which symbol ends a C++ statement?",
+      "answers": ["A. :", "B. .", "C. ;", "D. ,"],
+      "correct": 2
+    },
+    {
+      "question": "Which of the following is a loop structure?",
+      "answers": ["A. repeat", "B. foreach", "C. for", "D. iterate"],
+      "correct": 2
+    },
+    {
+      "question": "Which data type stores true/false values?",
+      "answers": ["A. bool", "B. char", "C. int", "D. string"],
+      "correct": 0
+    },
+    {
+      "question": "Which operator compares two values?",
+      "answers": ["A. =", "B. ==", "C. +=", "D. <>"],
+      "correct": 1
+    },
+    {
+      "question": "Which structure stores multiple values of the same type?",
+      "answers": ["A. array", "B. map", "C. pair", "D. string"],
+      "correct": 0
+    },
+    {
+      "question": "Which keyword exits a loop?",
+      "answers": ["A. stop", "B. exit", "C. break", "D. quit"],
+      "correct": 2
+    },
+    {
+      "question": "Which operator adds two numbers?",
+      "answers": ["A. ++", "B. +", "C. += ", "D. add"],
+      "correct": 1
+    },
+    {
+      "question": "Which header contains mathematical functions?",
+      "answers": ["A. math", "B. cmath", "C. calc", "D. compute"],
+      "correct": 1
+    },
+    {
+      "question": "Which function outputs a newline?",
+      "answers": ["A. cout << /n", "B. cout << endl", "C. printline()", "D. newline()"],
+      "correct": 1
+    }
+  ],
+
+  "level3": [
+    {
+      "question": "Which keyword creates dynamic memory?",
+      "answers": ["A. alloc", "B. malloc", "C. new", "D. create"],
+      "correct": 2
+    },
+    {
+      "question": "Which keyword releases dynamic memory?",
+      "answers": ["A. delete", "B. free()", "C. destroy", "D. release"],
+      "correct": 0
+    },
+    {
+      "question": "Which symbol accesses members of a pointer?",
+      "answers": ["A. .", "B. ->", "C. &", "D. #"],
+      "correct": 1
+    },
+    {
+      "question": "What is a constructor?",
+      "answers": [
+        "A. A function to destroy objects",
+        "B. A function that initializes objects",
+        "C. A function inside libraries",
+        "D. A special variable"
+      ],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword defines a class?",
+      "answers": ["A. struct", "B. object", "C. class", "D. define"],
+      "correct": 2
+    },
+    {
+      "question": "Which is NOT a looping structure?",
+      "answers": ["A. for", "B. foreach", "C. while", "D. do-while"],
+      "correct": 1
+    },
+    {
+      "question": "What does OOP stand for?",
+      "answers": ["A. Object Oriented Programming", "B. Optional Operation Process", "C. Original Oriented Protocol", "D. Open Operator Program"],
+      "correct": 0
+    },
+    {
+      "question": "Which concept hides data and restricts access?",
+      "answers": ["A. Polymorphism", "B. Inheritance", "C. Encapsulation", "D. Overloading"],
+      "correct": 2
+    },
+    {
+      "question": "What is function overloading?",
+      "answers": [
+        "A. Two functions with same name, different parameters",
+        "B. Overriding a function",
+        "C. Using too many functions",
+        "D. Replacing a system function"
+      ],
+      "correct": 0
+    },
+    {
+      "question": "Which function is automatically called when an object is destroyed?",
+      "answers": ["A. free()", "B. dispose()", "C. destructor", "D. end()"],
+      "correct": 2
+    }
+  ],
+
+  "level4": [
+    {
+      "question": "Which type of inheritance allows one class to inherit from multiple classes?",
+      "answers": ["A. Multi-level", "B. Hierarchical", "C. Multiple", "D. Hybrid"],
+      "correct": 2
+    },
+    {
+      "question": "What is polymorphism?",
+      "answers": [
+        "A. Hiding data",
+        "B. One function behaving differently",
+        "C. Combining classes",
+        "D. Sharing memory"
+      ],
+      "correct": 1
+    },
+    {
+      "question": "Which access specifier allows use only inside the same class?",
+      "answers": ["A. public", "B. private", "C. protected", "D. global"],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword is used for inheritance?",
+      "answers": ["A. extends", "B. using", "C. inherits", "D. ::"],
+      "correct": 3
+    },
+    {
+      "question": "Which method cannot be overloaded?",
+      "answers": ["A. static", "B. main()", "C. constructor", "D. destructor"],
+      "correct": 3
+    },
+    {
+      "question": "Which container stores key-value pairs?",
+      "answers": ["A. vector", "B. map", "C. array", "D. list"],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword prevents a variable from being changed?",
+      "answers": ["A. final", "B. lock", "C. const", "D. static"],
+      "correct": 2
+    },
+    {
+      "question": "What is an abstract class?",
+      "answers": [
+        "A. Class without methods",
+        "B. Class that cannot be instantiated",
+        "C. Class with only static methods",
+        "D. Class without constructors"
+      ],
+      "correct": 1
+    },
+    {
+      "question": "Which operator overloads the equals operator?",
+      "answers": ["A. +=", "B. ==", "C. ::operator==", "D. operator=="],
+      "correct": 3
+    },
+    {
+      "question": "Which keyword indicates an exception handler?",
+      "answers": ["A. catch", "B. trap", "C. monitor", "D. fix"],
+      "correct": 0
+    }
+  ],
+
+  "level5": [
+    {
+      "question": "Which keyword makes class members accessible in child classes but not outside?",
+      "answers": ["A. private", "B. protected", "C. public", "D. sealed"],
+      "correct": 1
+    },
+    {
+      "question": "Which concept allows a base class pointer to refer to a derived object?",
+      "answers": ["A. Encapsulation", "B. Polymorphism", "C. Casting", "D. Inheritance"],
+      "correct": 1
+    },
+    {
+      "question": "Which function allocates an array in dynamic memory?",
+      "answers": ["A. new[]", "B. malloc[]", "C. alloc[]", "D. create[]"],
+      "correct": 0
+    },
+    {
+      "question": "Which function frees memory allocated with new[]?",
+      "answers": ["A. free()", "B. delete[]", "C. release()", "D. dispose()"],
+      "correct": 1
+    },
+    {
+      "question": "Which container automatically sorts its keys?",
+      "answers": ["A. unordered_map", "B. vector", "C. map", "D. list"],
+      "correct": 2
+    },
+    {
+      "question": "Which type of polymorphism is resolved at compile-time?",
+      "answers": ["A. Runtime polymorphism", "B. Dynamic binding", "C. Function overloading", "D. Virtual function"],
+      "correct": 2
+    },
+    {
+      "question": "Which type of class contains only pure virtual functions?",
+      "answers": ["A. Abstract class", "B. Regular class", "C. Interface class", "D. Static class"],
+      "correct": 2
+    },
+    {
+      "question": "Which keyword is used to define a virtual function?",
+      "answers": ["A. virtual", "B. override", "C. dynamic", "D. impl"],
+      "correct": 0
+    },
+    {
+      "question": "What is the diamond problem related to?",
+      "answers": ["A. Loops", "B. Memory leaks", "C. Multiple inheritance", "D. Templates"],
+      "correct": 2
+    },
+    {
+      "question": "Which feature allows writing functions that work with any data type?",
+      "answers": ["A. Interfaces", "B. Generics", "C. Templates", "D. Macros"],
+      "correct": 2
+    }
+  ]
+}

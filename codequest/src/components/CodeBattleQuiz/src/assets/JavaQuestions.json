@@ -1,0 +1,291 @@
+{
+  "level1": [
+    {
+      "question": "Which keyword is used to define a class in Java?",
+      "answers": ["A. class", "B. define", "C. struct", "D. object"],
+      "correct": 0
+    },
+    {
+      "question": "Which method is the entry point of a Java program?",
+      "answers": ["A. start()", "B. main()", "C. run()", "D. begin()"],
+      "correct": 1
+    },
+    {
+      "question": "Which symbol begins a single-line comment?",
+      "answers": ["A. <!--", "B. /*", "C. //", "D. ##"],
+      "correct": 2
+    },
+    {
+      "question": "How do you print text in Java?",
+      "answers": ["A. echo()", "B. print()", "C. System.out.println()", "D. cout <<"],
+      "correct": 2
+    },
+    {
+      "question": "Which data type stores whole numbers?",
+      "answers": ["A. float", "B. boolean", "C. int", "D. char"],
+      "correct": 2
+    },
+    {
+      "question": "What is the correct file extension for Java source files?",
+      "answers": ["A. .jav", "B. .java", "C. .class", "D. .js"],
+      "correct": 1
+    },
+    {
+      "question": "Which primitive type stores true/false values?",
+      "answers": ["A. bool", "B. boolean", "C. truth", "D. bit"],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword declares a variable?",
+      "answers": ["A. let", "B. define", "C. var", "D. None of these"],
+      "correct": 3
+    },
+    {
+      "question": "Which data type stores decimal numbers?",
+      "answers": ["A. int", "B. float", "C. boolean", "D. char"],
+      "correct": 1
+    },
+    {
+      "question": "What does JVM stand for?",
+      "answers": ["A. Java Variable Machine", "B. Java Virtual Machine", "C. Java Vector Module", "D. Java Version Manager"],
+      "correct": 1
+    }
+  ],
+
+  "level2": [
+    {
+      "question": "Which keyword is used to create an object?",
+      "answers": ["A. new", "B. make", "C. create", "D. build"],
+      "correct": 0
+    },
+    {
+      "question": "Which operator checks equality?",
+      "answers": ["A. =", "B. ==", "C. ===", "D. eq"],
+      "correct": 1
+    },
+    {
+      "question": "Java files compile into which file type?",
+      "answers": ["A. .exe", "B. .class", "C. .jar", "D. .obj"],
+      "correct": 1
+    },
+    {
+      "question": "Which collection does NOT allow duplicates?",
+      "answers": ["A. ArrayList", "B. Vector", "C. HashSet", "D. LinkedList"],
+      "correct": 2
+    },
+    {
+      "question": "Which primitive type is the largest?",
+      "answers": ["A. int", "B. float", "C. long", "D. byte"],
+      "correct": 2
+    },
+    {
+      "question": "Which loop is best for iterating a known number of times?",
+      "answers": ["A. while", "B. do-while", "C. for", "D. repeat"],
+      "correct": 2
+    },
+    {
+      "question": "Which keyword is used to import packages?",
+      "answers": ["A. include", "B. using", "C. import", "D. package"],
+      "correct": 2
+    },
+    {
+      "question": "Which method belongs to the Math class?",
+      "answers": ["A. Math.square()", "B. Math.power()", "C. Math.sqrt()", "D. Math.root()"],
+      "correct": 2
+    },
+    {
+      "question": "Which operator concatenates strings?",
+      "answers": ["A. +", "B. &", "C. ++", "D. concat"],
+      "correct": 0
+    },
+    {
+      "question": "Which keyword stops a loop?",
+      "answers": ["A. break", "B. stop", "C. end", "D. exit"],
+      "correct": 0
+    }
+  ],
+
+  "level3": [
+    {
+      "question": "Which keyword prevents modification of a variable?",
+      "answers": ["A. static", "B. constant", "C. final", "D. immutable"],
+      "correct": 2
+    },
+    {
+      "question": "Which class is the root of all Java classes?",
+      "answers": ["A. Main", "B. Object", "C. Base", "D. Root"],
+      "correct": 1
+    },
+    {
+      "question": "Which loop guarantees at least one execution?",
+      "answers": ["A. for", "B. while", "C. do-while", "D. foreach"],
+      "correct": 2
+    },
+    {
+      "question": "Which exception occurs for division by zero?",
+      "answers": ["A. IOException", "B. ArithmeticException", "C. NullPointerException", "D. OverflowException"],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword is used for inheritance?",
+      "answers": ["A. with", "B. inherits", "C. extends", "D. override"],
+      "correct": 2
+    },
+    {
+      "question": "Which keyword defines an interface?",
+      "answers": ["A. interface", "B. struct", "C. proto", "D. template"],
+      "correct": 0
+    },
+    {
+      "question": "Which collection preserves insertion order?",
+      "answers": ["A. HashSet", "B. TreeSet", "C. LinkedHashSet", "D. Map"],
+      "correct": 2
+    },
+    {
+      "question": "Which method is used to compare strings?",
+      "answers": ["A. equals()", "B. same()", "C. compare()", "D. check()"],
+      "correct": 0
+    },
+    {
+      "question": "Which class handles input from the keyboard?",
+      "answers": ["A. Scanner", "B. Reader", "C. Input", "D. Keyboard"],
+      "correct": 0
+    },
+    {
+      "question": "What is method overloading?",
+      "answers": [
+        "A. Same method, new parameters",
+        "B. Same name, different logic",
+        "C. Replacing parent method",
+        "D. Two classes sharing a method"
+      ],
+      "correct": 0
+    }
+  ],
+
+  "level4": [
+    {
+      "question": "Which keyword calls a parent class constructor?",
+      "answers": ["A. parent()", "B. base()", "C. super()", "D. this()"],
+      "correct": 2
+    },
+    {
+      "question": "Which OOP principle hides internal details?",
+      "answers": ["A. Inheritance", "B. Encapsulation", "C. Polymorphism", "D. Abstraction"],
+      "correct": 1
+    },
+    {
+      "question": "Which class handles dynamic arrays?",
+      "answers": ["A. Array", "B. ArrayList", "C. Vector", "D. List"],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword defines a subclass?",
+      "answers": ["A. extends", "B. derives", "C. inherits", "D. child"],
+      "correct": 0
+    },
+    {
+      "question": "Which method is executed when an object is created?",
+      "answers": ["A. setter", "B. initializer", "C. launcher", "D. constructor"],
+      "correct": 3
+    },
+    {
+      "question": "What is polymorphism?",
+      "answers": [
+        "A. Many classes working together",
+        "B. One task done in many forms",
+        "C. Data hiding mechanism",
+        "D. Extending classes"
+      ],
+      "correct": 1
+    },
+    {
+      "question": "Which collection stores key-value pairs?",
+      "answers": ["A. List", "B. Map", "C. Set", "D. Vector"],
+      "correct": 1
+    },
+    {
+      "question": "Which block handles exceptions?",
+      "answers": ["A. do", "B. try-catch", "C. begin-end", "D. inspect"],
+      "correct": 1
+    },
+    {
+      "question": "Which method runs when an object is destroyed?",
+      "answers": ["A. finalize()", "B. end()", "C. close()", "D. death()"],
+      "correct": 0
+    },
+    {
+      "question": "What is an abstract class?",
+      "answers": [
+        "A. A class without fields",
+        "B. A class that cannot be instantiated",
+        "C. A class with no children",
+        "D. A class without methods"
+      ],
+      "correct": 1
+    }
+  ],
+
+  "level5": [
+    {
+      "question": "Which concept allows multiple classes to share the same interface behavior?",
+      "answers": ["A. Inheritance", "B. Abstraction", "C. Polymorphism", "D. Encapsulation"],
+      "correct": 2
+    },
+    {
+      "question": "What is method overriding?",
+      "answers": [
+        "A. Two methods with same name, different parameters",
+        "B. Child replacing parent's method",
+        "C. Multiple classes share a method",
+        "D. Same method called twice"
+      ],
+      "correct": 1
+    },
+    {
+      "question": "Which mechanism exposes essential features but hides details?",
+      "answers": ["A. Abstraction", "B. Encapsulation", "C. Polymorphism", "D. Extension"],
+      "correct": 0
+    },
+    {
+      "question": "Which keyword is used inside an interface method?",
+      "answers": ["A. public", "B. abstract", "C. static", "D. No keyword needed"],
+      "correct": 3
+    },
+    {
+      "question": "Which data structure sorts elements automatically?",
+      "answers": ["A. HashSet", "B. TreeSet", "C. LinkedList", "D. Vector"],
+      "correct": 1
+    },
+    {
+      "question": "Which pattern ensures only one instance of a class exists?",
+      "answers": ["A. Builder", "B. Singleton", "C. Factory", "D. Adapter"],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword prevents inheritance?",
+      "answers": ["A. lock", "B. stop", "C. final", "D. none"],
+      "correct": 2
+    },
+    {
+      "question": "Which type of class contains only abstract methods?",
+      "answers": ["A. Abstract", "B. Interface", "C. Static class", "D. Normal class"],
+      "correct": 1
+    },
+    {
+      "question": "What is multithreading?",
+      "answers": [
+        "A. Using many classes",
+        "B. Running multiple tasks simultaneously",
+        "C. Running code twice",
+        "D. Combining two programs"
+      ],
+      "correct": 1
+    },
+    {
+      "question": "Which keyword starts a thread?",
+      "answers": ["A. run()", "B. start()", "C. execute()", "D. begin()"],
+      "correct": 1
+    }
+  ]
+}
