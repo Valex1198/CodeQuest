@@ -145,16 +145,22 @@ cancelEl.addEventListener("click", () => {
     // --------------------------------------------------
     const saveData = await getSave(this.userId, this.slotId);
     const savedCodingTasks = saveData?.codingTasks?.[this.language] || {};
-    let startingTaskLevel = 1;
+    
+    // Priority: 1. Passed startingLevel, 2. Next incomplete level, 3. Default to 1
+    let startingTaskLevel = data?.startingLevel;
 
-    for (const key of Object.keys(tasksJSON[this.language]).sort(
-      (a, b) => a - b
-    )) {
-      if (!savedCodingTasks[key]?.completed) {
-        startingTaskLevel = Number(key);
-        break;
+    if (!startingTaskLevel) {
+      for (const key of Object.keys(tasksJSON[this.language]).sort(
+        (a, b) => a - b
+      )) {
+        if (!savedCodingTasks[key]?.completed) {
+          startingTaskLevel = Number(key);
+          break;
+        }
       }
     }
+    
+    if (!startingTaskLevel) startingTaskLevel = 1;
 
     this.cmObj.editor.dispatch({
       changes: {

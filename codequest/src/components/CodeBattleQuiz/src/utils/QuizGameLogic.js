@@ -14,18 +14,20 @@ export class QuizGameLogic {
     this.level = level;
     this.currentQuestionIndex = 0;
     this.selectedAnswer = null;
+    this.isTyping = false; // Flag to prevent clicking while text is animating
 
     // Flatten the questions for the selected level
-   // Flatten the questions for the selected level
-this.questions = (quizData?.questions || []).map(q => ({
-  question: q.question,
-  answers: q.answers,
-  correct: q.correct,
-}));
+    const rawQuestions = (quizData?.questions || []).map(q => ({
+      question: q.question,
+      answers: q.answers,
+      correct: q.correct,
+    }));
 
-this.totalQuestions = this.questions.length;
+    // Shuffle questions using Fisher-Yates algorithm
+    this.questions = this.shuffleArray(rawQuestions);
+    this.totalQuestions = this.questions.length;
 
-console.log("🔹 Loaded questions:", this.questions);
+    console.log("🔹 Loaded and shuffled questions:", this.questions);
 
 
     this.progressMarks = [];
@@ -40,6 +42,18 @@ console.log("🔹 Loaded questions:", this.questions);
 
     // Setup button zones
     this.createButtonZones();
+  }
+
+  // ---------------------------
+  // SHUFFLE ARRAY (Fisher-Yates)
+  // ---------------------------
+  shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   }
 
   // ---------------------------
@@ -188,11 +202,27 @@ console.log("🔹 Loaded questions:", this.questions);
     if (!q) return;
 
     this.selectedAnswer = null;
+    this.isTyping = true; // Lock input
     Object.values(this.textZones).forEach(({ bg }) => bg.setFillStyle(0x00ff66, 0));
 
+    // Clear previous text immediately
+    ["Question", "AnswerA", "AnswerB", "AnswerC", "AnswerD"].forEach(key => {
+        if (this.textZones[key]) this.textZones[key].text.setText("");
+    });
+
+    // Start Question typewriter
     this.typeWriterEffect(this.textZones.Question.text, q.question, 40, () => {
+      let completedAnswers = 0;
+      // After question is done, start all 4 answers
       ["AnswerA", "AnswerB", "AnswerC", "AnswerD"].forEach((key, i) => {
-        this.typeWriterEffect(this.textZones[key].text, q.answers[i], 30);
+        this.typeWriterEffect(this.textZones[key].text, q.answers[i], 30, () => {
+          completedAnswers++;
+          // Unlock input only when the LAST answer is done
+          if (completedAnswers === 4) {
+            this.isTyping = false;
+            console.log("🔓 Input unlocked");
+          }
+        });
       });
     });
   }
@@ -201,7 +231,7 @@ console.log("🔹 Loaded questions:", this.questions);
   // HANDLE ANSWER
   // ---------------------------
   handleAnswer(answerIndex) {
-    if (this.selectedAnswer !== null) return;
+    if (this.selectedAnswer !== null || this.isTyping) return;
     this.selectedAnswer = answerIndex;
 
     const correctIndex = this.questions[this.currentQuestionIndex].correct;
@@ -245,23 +275,39 @@ console.log("🔹 Loaded questions:", this.questions);
 
 async endQuiz(isGameOver = false) {
     const scene = this.scene;
-    console.log("🚀 [QuizGameLogic] Ending quiz...");
-  // const returnScene = scene.returnScene || "Comlab1Scene"; // fallback
-    // Calculate score
-    const correctCount = this.progressMarks.filter(m => m === 1).length;
-    const score = Math.round((correctCount / this.totalQuestions) * 100);
+    console.log(`🚀 [QuizGameLogic] Ending quiz (Early quit: ${isGameOver})...`);
 
-    // Save score asynchronously
-    try {
-        const storedUser = JSON.parse(localStorage.getItem("user")) || {};
-        const userId = storedUser.id || 1;
-        const slotId = scene.saveSlot ?? 1;
-        const language = scene.language ?? "Python";
+    // Only save and show results if we finished the questions (not a Q-quit)
+    if (!isGameOver) {
+      const correctCount = this.progressMarks.filter(m => m === 1).length;
+      const score = Math.round((correctCount / this.totalQuestions) * 100);
 
-        await updateQuizLevel(userId, slotId, language, this.level, score);
-        console.log("💾 Quiz score saved successfully!");
-    } catch (err) {
-        console.error("❌ Failed to save quiz score:", err);
+      try {
+          const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+          const userId = storedUser.id || 1;
+          const slotId = scene.saveSlot ?? 1;
+          const language = scene.language ?? "Python";
+
+          await updateQuizLevel(userId, slotId, language, this.level, score);
+          console.log("💾 Quiz score saved successfully!");
+      } catch (err) {
+          console.error("❌ Failed to save quiz score:", err);
+      }
+
+      // Launch ClipboardOverlay
+      const answersArray = Array(10).fill(null);
+      for (let i = 0; i < this.totalQuestions && i < 10; i++) {
+          answersArray[i] = this.progressMarks[i] === 1 ? 1 : 0;
+      }
+
+      if (scene.scene.isActive("ClipboardOverlay")) {
+          scene.scene.stop("ClipboardOverlay");
+      }
+      scene.scene.launch("ClipboardOverlay", {
+          level: this.level,
+          score: score,
+          answers: answersArray
+      });
     }
 
     // Clean up quiz UI
@@ -271,41 +317,25 @@ async endQuiz(isGameOver = false) {
             if (bg) bg.setVisible(false);
         });
     }
-    if (scene.overlay) scene.overlay.destroy();
-    if (scene.arena) scene.arena.destroy();
-    if (scene.time) scene.time.removeAllEvents();
-    if (scene.tweens) scene.tweens.killAll();
-    if (scene.eKeySprite) scene.eKeySprite.setVisible(false);
+    
+    // Stop QuizGame scene
+    scene.scene.stop("QuizGame");
+
+    // 🔹 CRITICAL: Resume parent scene to unfreeze the world
+    const returnScene = scene.returnSceneKey || "Comlab1Scene";
+    if (scene.scene.isPaused(returnScene)) {
+      scene.scene.resume(returnScene);
+      console.log(`✅ Resumed parent scene: ${returnScene}`);
+    }
 
     // Update HUD
     const hud = scene.scene.get("HudOverlay");
     if (hud?.updateTotalScore) await hud.updateTotalScore();
-
-    // Stop QuizGame scene
-    scene.scene.stop("QuizGame");
-
-    // -----------------------------
-    // Reset clipboard answers array
-    // -----------------------------
-    const answersArray = Array(10).fill(null); // reset
-    for (let i = 0; i < this.totalQuestions && i < 10; i++) {
-        answersArray[i] = this.progressMarks[i] === 1 ? 1 : 0;
+    if (scene.scene.isActive("HudOverlay")) {
+        scene.scene.setVisible(true, "HudOverlay");
+        scene.scene.bringToTop("HudOverlay");
     }
 
-    // Launch ClipboardOverlay (reset if already active)
-    if (scene.scene.isActive("ClipboardOverlay")) {
-        scene.scene.stop("ClipboardOverlay"); // force reset
-    }
-    scene.scene.launch("ClipboardOverlay", {
-        level: this.level,
-        score: score,
-        answers: answersArray
-    });
-    console.log("📋 Clipboard overlay launched after quiz");
-    
-    // -----------------------------
-    // Clear progressMarks for next quiz
-    // -----------------------------
     this.progressMarks = [];
     this.currentQuestionIndex = 0;
 }

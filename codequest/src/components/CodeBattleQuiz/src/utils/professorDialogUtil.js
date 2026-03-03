@@ -57,7 +57,7 @@ class ProfessorDialogUIScene extends Phaser.Scene {
         </div>
         <div id="levels" style="flex:1;overflow-y:auto;"></div>
         <div style="font-size:8px;text-align:center;opacity:0.6;">
-          ESC to close
+          ENTER to close
         </div>
       </div>
     `;
@@ -74,11 +74,6 @@ class ProfessorDialogUIScene extends Phaser.Scene {
     const save = await getSave(user.id, slot);
     const completed = save?.codingTasks?.[language] || {};
 
-    // Determine max unlocked level
-    const completedLevels = Object.keys(completed).map(Number).filter(k => completed[k]?.completed);
-    const maxCompletedLevel = completedLevels.length ? Math.max(...completedLevels) : 0;
-    const maxUnlockedLevel = maxCompletedLevel + 1; // next level unlocked
-
     const list = dom.getChildByID("levels");
 
     // -----------------------------
@@ -86,7 +81,13 @@ class ProfessorDialogUIScene extends Phaser.Scene {
     // -----------------------------
     for (let i = 1; i <= 10; i++) {
       const lvlData = completed[i] || { completed: false, score: 0 };
-      const unlocked = i <= maxUnlockedLevel;
+      
+      // Fixed logic: Unlock if it's Level 1, if it's already completed (replay), 
+      // or if the previous level was completed.
+      const unlocked = 
+        i === 1 || 
+        completed[i]?.completed === true || 
+        completed[i-1]?.completed === true;
 
       const btn = document.createElement("div");
       btn.textContent = `LEVEL ${i}${lvlData.completed ? ` ✓ (${lvlData.score || 0})` : ""}`;
@@ -121,15 +122,15 @@ class ProfessorDialogUIScene extends Phaser.Scene {
     }
 
     // -----------------------------
-    // ESC to close
+    // ENTER to close
     // -----------------------------
-    const escListener = () => {
+    const enterListener = () => {
       overlay.destroy();
       dom.destroy();
       this.scene.stop();
       this.scene.resume(parentScene);
     };
 
-    this.input.keyboard.once("keydown-ESC", escListener);
-  }
-}
+    this.input.keyboard.once("keydown-ENTER", enterListener);
+    }
+    }
