@@ -161,7 +161,7 @@ export default function CodeBattleQuiz() {
                 HudOverlay, Comlab1Scene, Comlab2Scene, Comlab3Scene, ClipboardOverlay, StatsOverlay, LeaderboardScene, TimerOverlayScene],
         scale: { mode: Phaser.Scale.NONE, autoCenter: Phaser.Scale.CENTER_BOTH },
         backgroundColor: 0x000000,
-        
+        render: { pixelArt: true },
         physics: { default: "arcade", arcade: { debug: false } },
       };
       

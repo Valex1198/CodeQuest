@@ -87,7 +87,8 @@ export async function setSave(
   language = "Python",
   quiz = null,
   codingTasks = null,
-  isNewGame = false
+  isNewGame = false,
+  taxi = null
 ) {
   const now = new Date();
   const formattedDate = `${String(now.getMonth() + 1).padStart(2, "0")}/${String(
@@ -104,6 +105,15 @@ export async function setSave(
   if (player) {
     saveData.x = player.x;
     saveData.y = player.y;
+  }
+
+  // Save taxi position if provided
+  if (taxi) {
+    saveData.taxi = {
+      scene: taxi.scene,
+      x: taxi.x,
+      y: taxi.y
+    };
   }
 
   saveData.date = formattedDate;

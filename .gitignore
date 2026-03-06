@@ -15,3 +15,6 @@ judge0_box/
 *.zip
 *.7z
 *.iso
+package.json
+package-lock.json
+package-lock.json

@@ -43,6 +43,99 @@
          "y":0
         }, 
         {
+         "id":5,
+         "image":"",
+         "name":"Taxi",
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":6,
+         "name":"BirdLocation",
+         "objects":[
+                {
+                 "height":0,
+                 "id":42,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":212.666666666667,
+                 "y":310.666666666667
+                }, 
+                {
+                 "height":0,
+                 "id":43,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":426.666666666667,
+                 "y":191.333333333333
+                }, 
+                {
+                 "height":0,
+                 "id":44,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":377.333333333333,
+                 "y":381.333333333333
+                }, 
+                {
+                 "height":0,
+                 "id":45,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":804.666666666667,
+                 "y":284
+                }, 
+                {
+                 "height":0,
+                 "id":47,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":882,
+                 "y":492
+                }, 
+                {
+                 "height":0,
+                 "id":48,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":148.666666666667,
+                 "y":92
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "draworder":"topdown",
          "id":4,
          "name":"Portal",
@@ -419,6 +512,17 @@
                  "width":44,
                  "x":81.25,
                  "y":365.25
+                }, 
+                {
+                 "height":5.33333333333337,
+                 "id":38,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":954.666666666667,
+                 "x":-0.666666666666667,
+                 "y":444.666666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -426,8 +530,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":5,
- "nextobjectid":37,
+ "nextlayerid":7,
+ "nextobjectid":49,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
