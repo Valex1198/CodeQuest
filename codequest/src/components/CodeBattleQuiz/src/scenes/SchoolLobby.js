@@ -75,7 +75,7 @@ export class SchoolLobbyScene extends Phaser.Scene {
         });
       });
     } catch (err) {
-      console.error("Failed to load player:", err);
+      console.error("Failed to load players:", err);
     }
 
     // ===============================
