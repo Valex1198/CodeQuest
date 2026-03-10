@@ -9,12 +9,16 @@ export function preloadPlayer(scene) {
 
 // Create player sprite
 export function createPlayer(scene, x, y, texture = "playerIdle") {
+  // Add shadow before player so it's underneath
+  const shadow = scene.add.ellipse(x, y, 24, 12, 0x000000, 0.3);
+  
   const player = scene.physics.add.sprite(x, y, texture);
   player.setOrigin(0.5, 1);
   player.body.setSize(32, 32);
   player.body.setOffset(0, 16);
   player.setCollideWorldBounds(true);
   player.lastDir = "down";
+  player.shadow = shadow;
 
   // Animations
   if (!scene.anims.exists("walk_down")) {
@@ -46,16 +50,27 @@ export function createPlayer(scene, x, y, texture = "playerIdle") {
 
   // Camera follow
   const cam = scene.cameras.main;
-  cam.startFollow(player, true, 0.5, 0.5);
+  cam.startFollow(player, true, 1.0, 1.0); // 1.0 Lerp for instant follow, true for roundPixels
   cam.setZoom(1.5);
   cam.centerOn(player.x, player.y);
+
+  // Sync shadow AFTER physics step to prevent micro-stutter
+  scene.events.on("postupdate", () => {
+    if (player.active && player.shadow) {
+        player.shadow.x = player.x;
+        player.shadow.y = player.y;
+        player.shadow.setVisible(player.visible);
+    }
+  });
 
   return player;
 }
 
 // Update movement and animation
-export function updatePlayer(player, speed = 200) {
+export function updatePlayer(player, speed = 200, skipControls = false) {
   if (!player || !player.body) return; // ✅ ensure body exists
+
+  if (skipControls) return;
 
   const keys = player.keys;
   if (!keys) return; // safety check

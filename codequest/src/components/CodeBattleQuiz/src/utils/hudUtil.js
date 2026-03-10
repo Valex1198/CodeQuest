@@ -24,6 +24,12 @@ export async function launchHUD(scene, player, saveSlot = 1, language = "Python"
             language
         });
 
+        // Also launch SchoolIDOverlay (it starts hidden/active for key listening)
+        scene.scene.launch("SchoolIDOverlay");
+        
+        // Launch PickupOverlay (it starts hidden)
+        scene.scene.launch("PickupOverlay");
+
         const hudScene = scene.scene.get("HudOverlay");
 
         hudScene.events.once("create", async () => {
@@ -44,4 +50,17 @@ export async function launchHUD(scene, player, saveSlot = 1, language = "Python"
 }
 export function getHUD(scene) {
     return scene.scene.get("HudOverlay");
+}
+
+/**
+ * Show the pickup box with an item name and optional icon
+ * @param {Phaser.Scene} scene - Current scene
+ * @param {string} itemName - Name of the item
+ * @param {string} itemIconKey - (Optional) Texture key for the icon
+ */
+export function showPickup(scene, itemName, itemIconKey = null) {
+    const pickupScene = scene.scene.get("PickupOverlay");
+    if (pickupScene) {
+        pickupScene.show(itemName, itemIconKey);
+    }
 }

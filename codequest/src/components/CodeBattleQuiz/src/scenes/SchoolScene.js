@@ -7,6 +7,10 @@ import TaxiDrivingPng from "../assets/Taxidriving.png";
 import TaxiDrivingJson from "../assets/Taxidriving.json";
 import BirdPng from "../assets/BirdSprite.png";
 import BirdJson from "../assets/BirdSprite.json";
+import GuardPng from "../assets/Guard.png";
+import GuardJson from "../assets/Guard.json";
+import GuardDialogue from "../../../../assets/dialogue/guard.json";
+import { getNPCDialogue } from "../utils/DialogueManager";
 import { Bird } from "../utils/Bird";
 import { preloadPlayer, updatePlayer } from "../utils/player";
 import { setupPortals, handlePortalUpdate, fadeInFromPortal } from "../utils/PortalManager";
@@ -29,6 +33,7 @@ export class SchoolScene extends Phaser.Scene {
     this.load.image("School", SchoolBg);
     this.load.atlas("idleTaxi", TaxiIdlePng, TaxiIdleJson);
     this.load.atlas("drivingTaxi", TaxiDrivingPng, TaxiDrivingJson);
+    this.load.atlas("guard", GuardPng, GuardJson);
     Bird.preload(this, BirdPng, BirdJson);
     preloadPlayer(this);
     preloadSongUI(this);
@@ -57,7 +62,7 @@ export class SchoolScene extends Phaser.Scene {
         this.birds.add(bird);
     });
 
-    // Create taxi animations if they don't exist
+    // Create animations
     if (!this.anims.exists("taxi_idle")) {
       this.anims.create({
         key: "taxi_idle",
@@ -85,6 +90,20 @@ export class SchoolScene extends Phaser.Scene {
       });
     }
 
+    if (!this.anims.exists("guard_idle")) {
+      this.anims.create({
+        key: "guard_idle",
+        frames: this.anims.generateFrameNames("guard", {
+          prefix: "Guard ",
+          suffix: ".aseprite",
+          start: 0,
+          end: 5,
+        }),
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
+
     // Default player position
     const defaultX = data?.x ?? 238;
     const defaultY = data?.y ?? 270;
@@ -92,9 +111,70 @@ export class SchoolScene extends Phaser.Scene {
     // Load player
     const { player, slot, language, saveData } = await loadPlayer(this, data, defaultX, defaultY);
     this.player = player;
+    this.player.setDepth(10); // Ensure player is on top
     this.currentSlot = slot;
     this.language = language;
     this.physics.add.collider(this.player, this.collisionZones);
+
+    // Guard NPC from Tiled
+    const guardObj = map.getObjectLayer("Guard")?.objects[0];
+    const guardX = guardObj?.x ?? 446;
+    const guardY = guardObj?.y ?? 68;
+
+    this.guard = this.physics.add.sprite(guardX, guardY, "guard");
+    this.guard.setDepth(5); // Lower depth than player
+    this.guard.play("guard_idle");
+    this.guard.setImmovable(true);
+    if (this.guard.body.setAllowGravity) this.guard.body.setAllowGravity(false);
+    this.physics.add.collider(this.player, this.guard);
+
+    // Guard Interaction Prompt
+    this.interactText = this.add.text(guardX, guardY - 40, "Press E to talk", {
+      fontSize: "14px",
+      fill: "#ffffff",
+      backgroundColor: "rgba(0,0,0,0.6)",
+      padding: { x: 4, y: 2 }
+    }).setOrigin(0.5).setVisible(false);
+
+    // Dialogue Bubble
+    this.dialogueBubble = this.add.container(guardX, guardY - 70).setVisible(false);
+    const bubbleBg = this.add.graphics();
+    bubbleBg.fillStyle(0x000000, 0.8);
+    bubbleBg.fillRoundedRect(-100, -60, 200, 60, 10);
+    bubbleBg.lineStyle(2, 0xffffff, 1);
+    bubbleBg.strokeRoundedRect(-100, -60, 200, 60, 10);
+    this.dialogueText = this.add.text(0, -30, "", {
+      fontSize: "12px",
+      fill: "#ffffff",
+      wordWrap: { width: 180 },
+      align: "center"
+    }).setOrigin(0.5);
+    this.dialogueBubble.add([bubbleBg, this.dialogueText]);
+
+    // Handle Interaction
+    this.input.keyboard.on("keydown-E", () => {
+      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.guard.x, this.guard.y);
+      if (dist < 60) {
+        if (this.dialogueBubble.visible) {
+          this.dialogueBubble.setVisible(false);
+        } else {
+          // Get current state from user in localStorage or default
+          const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+          const gameState = {
+            flags: storedUser.flags || {},
+            quests: storedUser.quests || {},
+            inventory: storedUser.inventory || [],
+            user: storedUser
+          };
+
+          const dialogue = getNPCDialogue(GuardDialogue, gameState);
+          if (dialogue) {
+            this.dialogueText.setText(dialogue.text);
+            this.dialogueBubble.setVisible(true);
+          }
+        }
+      }
+    });
 
     // Static taxi if saved here
     if (saveData?.taxi?.scene === "SchoolScene" && !data?.arrivingByTaxi) {
@@ -152,9 +232,20 @@ export class SchoolScene extends Phaser.Scene {
         y: 255,
         duration: 5000, // Slower arrival speed to match Outside
         ease: "Linear",
-        onComplete: () => {
+        onComplete: async () => {
           taxi.play("taxi_idle");
           
+          // Auto-save upon arrival
+          const storedUser = JSON.parse(localStorage.getItem("user"));
+          const userId = storedUser?.id || 1;
+          const taxiData = {
+              scene: this.scene.key,
+              x: taxi.x,
+              y: taxi.y
+          };
+          await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData);
+          console.log("💾 Auto-saved arrival at School Scene.");
+
           // Player "gets out"
           this.time.delayedCall(500, () => {
             this.player.setVisible(true);
@@ -271,6 +362,22 @@ export class SchoolScene extends Phaser.Scene {
   update() {
     if (!this.player || !this.player.body) return;
 
+    // Always sync shadow and handle controls if not auto-moving or returning
+    updatePlayer(this.player, 200, this.isReturning || this.isAutoMoving);
+
+    // Proximity check for Guard prompt
+    if (this.guard && this.interactText) {
+        const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.guard.x, this.guard.y);
+        if (dist < 60) {
+            this.interactText.setVisible(!this.dialogueBubble.visible);
+        } else {
+            this.interactText.setVisible(false);
+            if (this.dialogueBubble.visible) {
+                this.dialogueBubble.setVisible(false);
+            }
+        }
+    }
+
     // Proximity check for return prompt
     if (this.taxi && this.returnText && !this.isReturning) {
         const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.taxi.x, this.taxi.y);
@@ -303,9 +410,6 @@ export class SchoolScene extends Phaser.Scene {
             });
             this.isReturning = false;
         }
-    } else if (!this.isAutoMoving) {
-        // Only update manual player controls if not auto-moving
-        updatePlayer(this.player);
     }
 
     // Update portals safely

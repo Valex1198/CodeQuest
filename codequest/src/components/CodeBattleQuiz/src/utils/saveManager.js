@@ -88,7 +88,8 @@ export async function setSave(
   quiz = null,
   codingTasks = null,
   isNewGame = false,
-  taxi = null
+  taxi = null,
+  inventory = null
 ) {
   const now = new Date();
   const formattedDate = `${String(now.getMonth() + 1).padStart(2, "0")}/${String(
@@ -119,13 +120,15 @@ export async function setSave(
   saveData.date = formattedDate;
   saveData.language = language;
 
-  // Reset quiz and coding tasks if isNewGame
+  // Reset quiz, coding tasks, and inventory if isNewGame
   if (isNewGame) {
     saveData.quiz = createDefaultQuizSave();
     saveData.codingTasks = {};
+    saveData.inventory = [];
   } else {
     saveData.quiz = quiz || saveData.quiz || createDefaultQuizSave();
     saveData.codingTasks = codingTasks || saveData.codingTasks || {};
+    saveData.inventory = inventory || saveData.inventory || [];
   }
 
   try {

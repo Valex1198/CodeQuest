@@ -126,9 +126,20 @@
               x: 176,
               duration: 2000,
               ease: "Power2",
-              onComplete: () => {
+              onComplete: async () => {
                   taxi.play("taxi_idle");
                   this.isArrivalSequence = false;
+
+                  // Auto-save upon arrival
+                  const storedUser = JSON.parse(localStorage.getItem("user"));
+                  const userId = storedUser?.id || 1;
+                  const taxiData = {
+                      scene: this.scene.key,
+                      x: taxi.x,
+                      y: taxi.y
+                  };
+                  await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData);
+                  console.log("💾 Auto-saved arrival at Outside Scene.");
 
                   // Player gets out
                   this.time.delayedCall(500, () => {
@@ -248,6 +259,9 @@
     update() {
       if (!this.player || !this.player.body) return;
 
+      // Always sync shadow and handle controls if not auto-moving or driving
+      updatePlayer(this.player, 200, this.isDriving || this.isAutoMoving);
+
       if (this.isDriving && this.taxi) {
         // Move the taxi to the right at a slower speed
         this.taxi.x += 2;
@@ -272,9 +286,6 @@
             });
             this.isDriving = false; // Prevent multiple triggers
         }
-      } else if (!this.isAutoMoving) {
-        // Only update manual player controls if not auto-moving
-        updatePlayer(this.player);
       }
 
       // Update portals safely

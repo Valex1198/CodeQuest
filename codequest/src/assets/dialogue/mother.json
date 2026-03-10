@@ -1,0 +1,21 @@
+{
+  "npcId": "mother",
+  "name": "Mother",
+  "dialogueNodes": [
+    {
+      "id": "intro",
+      "text": "Good morning, dear! Don't forget to study your coding lessons today. The world needs more problem solvers.",
+      "conditions": [
+        { "type": "FLAG_EQUALS", "key": "met_mother", "value": false }
+      ],
+      "actions": [
+        { "type": "SET_FLAG", "key": "met_mother", "value": true }
+      ]
+    },
+    {
+      "id": "default",
+      "text": "I'm so proud of how hard you're working on your CodeQuest!",
+      "conditions": []
+    }
+  ]
+}
