@@ -1,0 +1,17 @@
+{
+  "npcId": "sakura",
+  "name": "Sakura",
+  "dialogueNodes": [
+    {
+      "id": "greeting",
+      "text": "Hey there! Isn't it a beautiful day to practice some code?",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "default",
+      "text": "Keep studying! I'm just enjoying the fresh air.",
+      "conditions": []
+    }
+  ]
+}

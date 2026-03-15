@@ -68,17 +68,30 @@ export class SchoolIDOverlay extends Phaser.Scene {
         this.isReady = true;
     }
 
-    toggleID() {
-        // If not ready, wait for create and then toggle
+    showID(customScale = 1.0, showDimOverlay = true) {
         if (!this.isReady) {
-            this.events.once("create", () => this.toggleID());
+            this.events.once("create", () => this.showID(customScale, showDimOverlay));
             return;
         }
-
         if (!this.panel) return;
 
-        const isVisible = !this.panel.visible;
-        this.panel.setVisible(isVisible);
-        this.overlay.setVisible(isVisible);
+        this.panel.setVisible(true);
+        this.overlay.setVisible(showDimOverlay);
+        this.panel.setScale(customScale);
+    }
+
+    hideID() {
+        if (!this.panel) return;
+        this.panel.setVisible(false);
+        this.overlay.setVisible(false);
+    }
+
+    toggleID() {
+        if (!this.panel) return;
+        if (this.panel.visible) {
+            this.hideID();
+        } else {
+            this.showID(1.0, true);
+        }
     }
 }

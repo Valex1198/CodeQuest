@@ -1,4 +1,8 @@
 export function createMenuButton(scene, emoji = "🏠", options = {}) {
+  if (!scene || !scene.add) {
+    console.warn("createMenuButton: Scene or scene.add is null. Returning null.");
+    return null;
+  }
   const {
     x = 755,
     y = 405,

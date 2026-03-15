@@ -89,7 +89,8 @@ export async function setSave(
   codingTasks = null,
   isNewGame = false,
   taxi = null,
-  inventory = null
+  inventory = null,
+  flags = null
 ) {
   const now = new Date();
   const formattedDate = `${String(now.getMonth() + 1).padStart(2, "0")}/${String(
@@ -120,15 +121,18 @@ export async function setSave(
   saveData.date = formattedDate;
   saveData.language = language;
 
-  // Reset quiz, coding tasks, and inventory if isNewGame
+  // Reset progress and taxi if isNewGame
   if (isNewGame) {
     saveData.quiz = createDefaultQuizSave();
     saveData.codingTasks = {};
     saveData.inventory = [];
+    saveData.flags = {};
+    saveData.taxi = null; // Ensure taxi is reset to its default Outside location
   } else {
     saveData.quiz = quiz || saveData.quiz || createDefaultQuizSave();
     saveData.codingTasks = codingTasks || saveData.codingTasks || {};
     saveData.inventory = inventory || saveData.inventory || [];
+    saveData.flags = flags || saveData.flags || {};
   }
 
   try {

@@ -109,9 +109,14 @@ export class HomeScene extends Phaser.Scene {
           if (success) {
             // Visual feedback
             showPickup(this, "School ID", "SchoolIDItem");
-            this.schoolID.destroy();
-            if (this.interactText) this.interactText.destroy();
-            this.schoolID = null;
+            if (this.schoolID) {
+              this.schoolID.destroy();
+              this.schoolID = null;
+            }
+            if (this.interactText) {
+              this.interactText.destroy();
+              this.interactText = null;
+            }
           }
         }
       });

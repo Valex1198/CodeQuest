@@ -1,0 +1,17 @@
+{
+  "npcId": "student1",
+  "name": "Alex",
+  "dialogueNodes": [
+    {
+      "id": "intro",
+      "text": "Hey! Are you here for the coding bootcamp too? The labs are just down the hallway.",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "default",
+      "text": "I really need to finish my Python project before the deadline...",
+      "conditions": []
+    }
+  ]
+}

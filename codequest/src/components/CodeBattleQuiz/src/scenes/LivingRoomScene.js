@@ -115,6 +115,9 @@ export class LivingRoomScene extends Phaser.Scene {
     this.currentSlot = slot;
     this.language = language;
 
+    // Fix Camera Delay: Increase lerp to 0.8 for responsive movement
+    this.cameras.main.startFollow(this.player, true, 0.8, 0.8);
+
     this.physics.add.collider(this.player, this.collisionZones);
 
     // Mother NPC from Tiled
@@ -125,12 +128,12 @@ export class LivingRoomScene extends Phaser.Scene {
     this.mother = this.physics.add.sprite(motherX, motherY, "mother");
     this.mother.setDepth(5);
     this.mother.play("mother_idle_down");
-    this.mother.setImmovable(true); // Immovable means NOT pushed by other bodies (like player)
+    this.mother.setImmovable(true); 
     if (this.mother.body.setAllowGravity) this.mother.body.setAllowGravity(false);
     this.physics.add.collider(this.player, this.mother);
-    this.physics.add.collider(this.mother, this.collisionZones); // Collision with walls
+    this.physics.add.collider(this.mother, this.collisionZones); 
 
-    // Mother Patrol Path: Square pattern (Left -> Down -> Right -> Up)
+    // Mother Patrol Path
     const motherPath = [
       { dir: "left", dist: 100, wait: 2000 },
       { dir: "down", dist: 50, wait: 1000 },
@@ -180,7 +183,6 @@ export class LivingRoomScene extends Phaser.Scene {
             this.dialogueText.setText(dialogue.text);
             this.dialogueBubble.setVisible(true);
 
-            // Auto-hide after 5 seconds
             if (this.dialogueTimer) this.dialogueTimer.remove();
             this.dialogueTimer = this.time.delayedCall(5000, () => {
               this.dialogueBubble.setVisible(false);
@@ -190,91 +192,53 @@ export class LivingRoomScene extends Phaser.Scene {
       }
     });
 
-    // Fade in if coming from portal
     if (data?.fromPortal) fadeInFromPortal(this, data);
-
-    // Portals
     setupPortals(this, map, this.player);
     createMenuButton(this, "🏠", { xOffset: 50, yOffset: 50, fontSize: 32 });
 
-    // Sync UI position after physics and camera updates to prevent stutter
+    // Sync UI position
     this.events.on("postupdate", () => {
         if (this.mother && this.mother.body) {
-            // Update prompt position
             if (this.interactText) this.interactText.setPosition(this.mother.x, this.mother.y - 40);
-
-            // Update bubble position with smoothing and screen clamping
             if (this.dialogueBubble && this.dialogueBubble.visible) {
                 const targetX = this.mother.x;
                 const targetY = this.mother.y - 70;
-
                 const cam = this.cameras.main;
                 const view = cam.worldView;
-                const marginX = 105; 
-                const marginYTop = 65; 
-                const marginYBottom = 10;
-
-                const clampedX = Phaser.Math.Clamp(targetX, view.x + marginX, view.x + view.width - marginX);
-                const clampedY = Phaser.Math.Clamp(targetY, view.y + marginYTop, view.y + view.height - marginYBottom);
-
-                // Smoother LERP (increased factor slightly)
+                const clampedX = Phaser.Math.Clamp(targetX, view.x + 105, view.x + view.width - 105);
+                const clampedY = Phaser.Math.Clamp(targetY, view.y + 65, view.y + view.height - 10);
                 this.dialogueBubble.x = Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2);
                 this.dialogueBubble.y = Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2);
-
-                const arrowX = targetX - this.dialogueBubble.x;
-                this.drawBubble(arrowX);
+                this.drawBubble(targetX - this.dialogueBubble.x);
             } else if (this.dialogueBubble) {
                 this.dialogueBubble.setPosition(this.mother.x, this.mother.y - 70);
                 this.drawBubble(0);
             }
-
-            // Proximity check for Mother prompt
             const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.mother.x, this.mother.y);
-            if (dist < 60) {
-                this.interactText.setVisible(!this.dialogueBubble.visible);
-            } else {
-                this.interactText.setVisible(false);
-            }
+            this.interactText.setVisible(dist < 60 && !this.dialogueBubble.visible);
         }
     });
 
-  // Launch HUD with username from database
     await launchHUD(this, this.player, this.currentSlot, this.language);
-    // Song UI
     this.songUI = createSongUI(this, "Living Room");
 
-    // Save hotkey (L)
     this.input.keyboard.on("keydown-L", async () => {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const userId = storedUser?.id || 1;
-      await setSave(userId, this.currentSlot, this, this.player, this.language);
+      await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, null, storedUser.inventory, storedUser.flags);
       console.log(`💾 Player saved in slot ${this.currentSlot}`);
     });
 
-    // Inventory
     this.scene.launch("InventoryOverlay");
-
-    // ESC → go to SaveSlotsScene
     this.input.keyboard.on("keydown-ESC", () => {
-      this.scene.start("SaveSlotsScene", {
-        player: this.player,
-        loadSlot: this.currentSlot,
-      });
+      this.scene.start("SaveSlotsScene", { player: this.player, loadSlot: this.currentSlot });
     });
   }
 
   update() {
     if (!this.player || !this.player.body) return;
     updatePlayer(this.player);
-
-    // Update Mother patrol
-    if (this.mother && this.mother.body) {
-        updateNPCMovement(this.mother, 80, this);
-    }
-    
-    // Safety: only update portals if initialized
-    if (this.portalZones && this.enterText && this.player.keys) {
-      handlePortalUpdate(this, this.player, this.player.keys);
-    }
+    if (this.mother && this.mother.body) updateNPCMovement(this.mother, 80, this);
+    if (this.portalZones && this.enterText && this.player.keys) handlePortalUpdate(this, this.player, this.player.keys);
   }
 }

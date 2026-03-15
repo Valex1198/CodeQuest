@@ -20,12 +20,15 @@ import { preloadSongUI, createSongUI } from "../utils/songUI";
 import { loadPlayer } from "../utils/playerLoader";
 import { launchHUD } from "../utils/hudUtil.js";
 import { createMenuButton } from "../utils/uiHelpers.js";
+import { hasItem, removeItem, getInventory } from "../utils/InventoryManager.js";
 
 export class SchoolScene extends Phaser.Scene {
   constructor() {
     super({ key: "SchoolScene" });
     this.player = null;
     this.currentSlot = null;
+    this.isGuardChecking = false;
+    this.guardApproved = false;
   }
 
   preload() {
@@ -40,6 +43,10 @@ export class SchoolScene extends Phaser.Scene {
   }
 
   async create(data) {
+    // Reset state for new slot load
+    this.isGuardChecking = false;
+    this.guardApproved = false;
+
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
 
@@ -114,10 +121,18 @@ export class SchoolScene extends Phaser.Scene {
     this.player.setDepth(10); // Ensure player is on top
     this.currentSlot = slot;
     this.language = language;
+
+    // Fix Camera Delay: Increase lerp to 0.8 for responsive movement
+    this.cameras.main.startFollow(this.player, true, 0.8, 0.8);
+
     this.physics.add.collider(this.player, this.collisionZones);
 
     // Guard NPC from Tiled
-    const guardObj = map.getObjectLayer("Guard")?.objects[0];
+    const guardLayer = map.getObjectLayer("Guard")?.objects || [];
+    const guardObj = guardLayer.find(obj => obj.name === "") || guardLayer[0];
+    const restSpotObj = guardLayer.find(obj => obj.name === "GuardSpotForRest");
+    
+    this.guardRestSpot = restSpotObj ? { x: restSpotObj.x, y: restSpotObj.y } : { x: 439, y: 59 };
     const guardX = guardObj?.x ?? 446;
     const guardY = guardObj?.y ?? 68;
 
@@ -151,26 +166,61 @@ export class SchoolScene extends Phaser.Scene {
     }).setOrigin(0.5);
     this.dialogueBubble.add([bubbleBg, this.dialogueText]);
 
+    // Portals initialization
+    setupPortals(this, map, this.player);
+
+    // Find the hallway portal and disable it initially
+    this.hallwayPortal = this.portalZones.getChildren().find(
+      (p) => p.properties?.name === "portalToHallway"
+    );
+    if (this.hallwayPortal && this.hallwayPortal.body) {
+      this.hallwayPortal.body.enable = false;
+    }
+
+    // Check if guard should be at rest
+    const storedUserData = JSON.parse(localStorage.getItem("user")) || {};
+    if (storedUserData.flags?.guard_gone) {
+      this.guardApproved = true;
+      this.guard.setPosition(this.guardRestSpot.x, this.guardRestSpot.y);
+      if (this.hallwayPortal && this.hallwayPortal.body) {
+        this.hallwayPortal.body.enable = true;
+      }
+    }
+
     // Handle Interaction
     this.input.keyboard.on("keydown-E", () => {
+      if (this.isGuardChecking || !this.guard) return;
+      
       const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.guard.x, this.guard.y);
       if (dist < 60) {
         if (this.dialogueBubble.visible) {
           this.dialogueBubble.setVisible(false);
         } else {
-          // Get current state from user in localStorage or default
-          const storedUser = JSON.parse(localStorage.getItem("user")) || {};
-          const gameState = {
-            flags: storedUser.flags || {},
-            quests: storedUser.quests || {},
-            inventory: storedUser.inventory || [],
-            user: storedUser
-          };
-
-          const dialogue = getNPCDialogue(GuardDialogue, gameState);
-          if (dialogue) {
-            this.dialogueText.setText(dialogue.text);
+          // If guard is approved/gone, show rest flavour text
+          if (this.guardApproved) {
+            this.dialogueText.setText("Mmm... this coffee is exactly what I needed. Enjoy the hallway!");
             this.dialogueBubble.setVisible(true);
+            return;
+          }
+
+          // Otherwise check for ID
+          const hasId = hasItem("School ID");
+          if (hasId) {
+            this.startGuardCheckSequence();
+          } else {
+            const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+            const gameState = {
+              flags: storedUser.flags || {},
+              quests: storedUser.quests || {},
+              inventory: storedUser.inventory || [],
+              user: storedUser
+            };
+
+            const dialogue = getNPCDialogue(GuardDialogue, gameState);
+            if (dialogue) {
+              this.dialogueText.setText(dialogue.text);
+              this.dialogueBubble.setVisible(true);
+            }
           }
         }
       }
@@ -216,7 +266,7 @@ export class SchoolScene extends Phaser.Scene {
       taxi.setSize(96, 48).setOffset(4, 12);
 
       this.cameras.main.stopFollow();
-      this.cameras.main.startFollow(taxi, true, 0.1, 0.1);
+      this.cameras.main.startFollow(taxi, true, 0.8, 0.8);
 
       // Start transparent for fade-in arrival
       taxi.setAlpha(0);
@@ -224,7 +274,7 @@ export class SchoolScene extends Phaser.Scene {
           targets: taxi,
           alpha: 1,
           duration: 1000
-      });
+        });
 
       this.tweens.add({
         targets: taxi,
@@ -243,7 +293,7 @@ export class SchoolScene extends Phaser.Scene {
               x: taxi.x,
               y: taxi.y
           };
-          await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData);
+          await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData, storedUser.inventory, storedUser.flags);
           console.log("💾 Auto-saved arrival at School Scene.");
 
           // Player "gets out"
@@ -259,7 +309,7 @@ export class SchoolScene extends Phaser.Scene {
               duration: 500,
               onComplete: () => {
                 this.isAutoMoving = false; // Disable auto-move
-                this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+                this.cameras.main.startFollow(this.player, true, 0.8, 0.8);
                 // Enable collision now that player is out
                 this.physics.add.collider(this.player, taxi);
                 
@@ -281,15 +331,10 @@ export class SchoolScene extends Phaser.Scene {
       fadeInFromPortal(this, data);
     }
 
-    // Portals
-    setupPortals(this, map, this.player);
     createMenuButton(this, "🏠", { xOffset: 50, yOffset: 50, fontSize: 32 });
     // Song UI
     this.songUI = createSongUI(this, " School ");
     await launchHUD(this, this.player, this.currentSlot, this.language);
-
-    // HUD overlay
-    
 
     // Keybind ENTER for returning
     this.input.keyboard.on("keydown-ENTER", () => {
@@ -325,7 +370,7 @@ export class SchoolScene extends Phaser.Scene {
                     if (this.player.body) this.player.body.enable = false;
                     
                     this.cameras.main.stopFollow();
-                    this.cameras.main.startFollow(this.taxi, true, 0.1, 0.1);
+                    this.cameras.main.startFollow(this.taxi, true, 0.8, 0.8);
                     
                     this.taxi.play("taxi_driving");
                     if (this.returnText) this.returnText.destroy();
@@ -346,8 +391,8 @@ export class SchoolScene extends Phaser.Scene {
           y: this.taxi.y
       } : null;
 
-      await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData);
-      console.log(`?? Player and Taxi saved in slot ${this.currentSlot}`);
+      await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData, storedUser.inventory, storedUser.flags);
+      console.log(`?? Player, Taxi, and Flags saved in slot ${this.currentSlot}`);
     });
 
     // ESC → go to SaveSlotsScene
@@ -359,20 +404,119 @@ export class SchoolScene extends Phaser.Scene {
     });
   }
 
+  startGuardCheckSequence() {
+    this.isGuardChecking = true;
+    
+    // First message: Stop and notice ID
+    this.dialogueText.setText("Stop right there! Hallway is restricted.");
+    this.dialogueBubble.setVisible(true);
+
+    this.time.delayedCall(2000, () => {
+      this.dialogueText.setText("Hmm? What's that in your hand? A School ID?");
+      
+      // Show the ID Overlay (Small scale, no dimming)
+      const schoolIDScene = this.scene.get("SchoolIDOverlay");
+      if (schoolIDScene && typeof schoolIDScene.showID === "function") {
+          schoolIDScene.showID(0.5, false);
+      }
+
+      this.time.delayedCall(2000, () => {
+        this.dialogueText.setText("Hand it over. I need to verify your credentials.");
+        
+        // Transaction simulation: Remove ID from inventory
+        const inv = getInventory();
+        const idIndex = inv.findIndex(item => item.name === "School ID" || item === "School ID");
+        if (idIndex !== -1) {
+          removeItem(idIndex);
+          console.log("School ID removed for checking.");
+        }
+
+        this.time.delayedCall(2500, () => {
+          this.dialogueText.setText("Scanning the barcode... verifying database entries...");
+          
+          this.time.delayedCall(3000, () => {
+            this.dialogueText.setText("The photo matches... and the encryption seems valid.");
+            
+            this.time.delayedCall(2500, () => {
+              this.dialogueText.setText("Alright, student. Everything is in order.");
+              this.guardApproved = true;
+
+              this.time.delayedCall(2000, () => {
+                this.dialogueText.setText("You may pass. I'm going to take my break now.");
+                
+                // Hide ID finally
+                if (schoolIDScene && typeof schoolIDScene.hideID === "function") {
+                    schoolIDScene.hideID();
+                }
+
+                this.time.delayedCall(2500, () => {
+                  this.dialogueBubble.setVisible(false);
+
+                  // 1. Fade out at current spot
+                  this.tweens.add({
+                    targets: this.guard,
+                    alpha: 0,
+                    duration: 1000,
+                    onComplete: () => {
+                      // 2. Teleport to rest spot
+                      this.guard.setPosition(this.guardRestSpot.x, this.guardRestSpot.y);
+                      
+                      // 3. Fade back in
+                      this.tweens.add({
+                        targets: this.guard,
+                        alpha: 1,
+                        duration: 1000,
+                        onComplete: () => {
+                          if (this.hallwayPortal && this.hallwayPortal.body) {
+                            this.hallwayPortal.body.enable = true;
+                            console.log("Hallway portal enabled!");
+                          }
+
+                          // Update flags in current session only (let the player choose when to save)
+                          const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+                          if (!storedUser.flags) storedUser.flags = {};
+                          storedUser.flags.guard_gone = true;
+                          localStorage.setItem("user", JSON.stringify(storedUser));
+                          
+                          this.isGuardChecking = false;
+                          
+                          // Show final rest flavour text
+                          this.dialogueText.setText("Ah, coffee time. Don't cause any trouble in the hallway!");
+                          this.dialogueBubble.setVisible(true);
+                          this.time.delayedCall(3000, () => {
+                            this.dialogueBubble.setVisible(false);
+                          });
+                        },
+                      });
+                    },
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+
   update() {
     if (!this.player || !this.player.body) return;
 
     // Always sync shadow and handle controls if not auto-moving or returning
-    updatePlayer(this.player, 200, this.isReturning || this.isAutoMoving);
+    updatePlayer(this.player, 200, this.isReturning || this.isAutoMoving || this.isGuardChecking);
 
-    // Proximity check for Guard prompt
-    if (this.guard && this.interactText) {
+    // Sync bubble/prompt with Guard position
+    if (this.guard && this.guard.active) {
+        if (this.interactText) this.interactText.setPosition(this.guard.x, this.guard.y - 40);
+        if (this.dialogueBubble) this.dialogueBubble.setPosition(this.guard.x, this.guard.y - 70);
+
+        // Proximity check for Guard prompt
         const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.guard.x, this.guard.y);
         if (dist < 60) {
-            this.interactText.setVisible(!this.dialogueBubble.visible);
+            this.interactText.setVisible(!this.dialogueBubble.visible && !this.isGuardChecking);
         } else {
             this.interactText.setVisible(false);
-            if (this.dialogueBubble.visible) {
+            if (this.dialogueBubble.visible && !this.isGuardChecking) {
                 this.dialogueBubble.setVisible(false);
             }
         }

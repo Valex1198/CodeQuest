@@ -15,7 +15,7 @@ export const checkCondition = (condition, gameState) => {
     case 'QUEST_STATUS':
       return gameState.quests?.[id] === status;
     case 'HAS_ITEM':
-      return gameState.inventory?.includes(item);
+      return gameState.inventory?.some(i => i === item || i.name === item);
     case 'MIN_LEVEL':
       return (gameState.user?.level || 0) >= value;
     default:

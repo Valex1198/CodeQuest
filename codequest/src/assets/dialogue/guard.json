@@ -3,27 +3,20 @@
   "name": "School Guard",
   "dialogueNodes": [
     {
-      "id": "restricted_area",
-      "text": "The hallway is off-limits during the lecture. Unless you have a pass?",
+      "id": "welcome_id",
+      "text": "Oh, you have an ID. Go ahead, don't be late for your next coding challenge.",
       "conditions": [
-        { "type": "FLAG_EQUALS", "key": "has_hall_pass", "value": false }
-      ],
-      "actions": []
-    },
-    {
-      "id": "welcome_pass",
-      "text": "Oh, you have a pass. Go ahead, don't be late for your next coding challenge.",
-      "conditions": [
-        { "type": "FLAG_EQUALS", "key": "has_hall_pass", "value": true }
+        { "type": "HAS_ITEM", "item": "School ID" }
       ],
       "actions": [
         { "type": "SET_FLAG", "key": "met_guard", "value": true }
       ]
     },
     {
-      "id": "default",
-      "text": "Keep studying hard. The world needs more coders.",
-      "conditions": []
+      "id": "restricted_area",
+      "text": "The hallway is off-limits. I don't see a School ID on you. You'll need one to pass.",
+      "conditions": [],
+      "actions": []
     }
   ]
 }
