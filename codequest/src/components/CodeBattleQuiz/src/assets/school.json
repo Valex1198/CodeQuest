@@ -87,12 +87,12 @@
                         {
                          "name":"spawnX",
                          "type":"int",
-                         "value":768
+                         "value":480
                         }, 
                         {
                          "name":"spawnY",
                          "type":"int",
-                         "value":510
+                         "value":450
                         }, 
                         {
                          "name":"targetScene",
