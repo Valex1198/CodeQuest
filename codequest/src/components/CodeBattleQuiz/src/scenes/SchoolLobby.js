@@ -148,7 +148,7 @@ export class SchoolLobbyScene extends Phaser.Scene {
       initNPCMovement(this.student1, studentPath, "student1_");
 
       // Interaction Prompt
-      this.interactText = this.add.text(studentX, studentY - 60, "Press E to talk", {
+      this.interactText = this.add.text(studentX, studentY - 40, "Press E to talk", {
         fontSize: "14px",
         fill: "#ffffff",
         backgroundColor: "rgba(0,0,0,0.6)",
@@ -156,7 +156,7 @@ export class SchoolLobbyScene extends Phaser.Scene {
       }).setOrigin(0.5).setVisible(false);
 
       // Dialogue Bubble
-      this.dialogueBubble = this.add.container(studentX, studentY - 90).setVisible(false).setDepth(15);
+      this.dialogueBubble = this.add.container(studentX, studentY - 70).setVisible(false).setDepth(15);
       this.bubbleBg = this.add.graphics();
       this.drawBubble(0);
       this.dialogueText = this.add.text(0, -30, "", {
@@ -175,17 +175,11 @@ export class SchoolLobbyScene extends Phaser.Scene {
             this.dialogueBubble.setVisible(false);
             if (this.dialogueTimer) this.dialogueTimer.remove();
           } else {
-            const storedUser = JSON.parse(localStorage.getItem("user")) || {};
-            const gameState = {
-              flags: storedUser.flags || {},
-              quests: storedUser.quests || {},
-              inventory: storedUser.inventory || [],
-              user: storedUser
-            };
-
-            const dialogue = getNPCDialogue(Student1Dialogue, gameState);
-            if (dialogue) {
-              this.dialogueText.setText(dialogue.text);
+            // Randomly pick a node for "multiple dialog that is randomly generated"
+            const nodes = Student1Dialogue.dialogueNodes || [];
+            if (nodes.length > 0) {
+              const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
+              this.dialogueText.setText(randomNode.text);
               this.dialogueBubble.setVisible(true);
 
               if (this.dialogueTimer) this.dialogueTimer.remove();
@@ -239,19 +233,19 @@ export class SchoolLobbyScene extends Phaser.Scene {
     // Sync UI position
     this.events.on("postupdate", () => {
         if (this.student1 && this.student1.body) {
-            if (this.interactText) this.interactText.setPosition(this.student1.x, this.student1.y - 60);
+            if (this.interactText) this.interactText.setPosition(this.student1.x, this.student1.y - 40);
             if (this.dialogueBubble && this.dialogueBubble.visible) {
                 const targetX = this.student1.x;
-                const targetY = this.student1.y - 90;
+                const targetY = this.student1.y - 70;
                 const cam = this.cameras.main;
                 const view = cam.worldView;
                 const clampedX = Phaser.Math.Clamp(targetX, view.x + 105, view.x + view.width - 105);
                 const clampedY = Phaser.Math.Clamp(targetY, view.y + 65, view.y + view.height - 10);
-                this.dialogueBubble.x = Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2);
-                this.dialogueBubble.y = Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2);
+                this.dialogueBubble.x = Math.round(Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2));
+                this.dialogueBubble.y = Math.round(Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2));
                 this.drawBubble(targetX - this.dialogueBubble.x);
             } else if (this.dialogueBubble) {
-                this.dialogueBubble.setPosition(this.student1.x, this.student1.y - 90);
+                this.dialogueBubble.setPosition(this.student1.x, this.student1.y - 70);
                 this.drawBubble(0);
             }
             const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.student1.x, this.student1.y);

@@ -4,6 +4,7 @@
  */
 
 import { getSave, setSave } from "./saveManager";
+import { completeGoal } from "./GoalManager";
 
 const MAX_SLOTS = 9;
 
@@ -52,6 +53,12 @@ export const addItem = async (item) => {
         const slotId = user.currentSlot || 1;
         if (user.id) {
             await addItemToSave(user.id, slotId, item);
+        }
+
+        // --- GOAL TRACKING ---
+        const itemName = typeof item === 'string' ? item : (item.name || "");
+        if (itemName === "School ID") {
+            completeGoal("get_id");
         }
         
         return true;

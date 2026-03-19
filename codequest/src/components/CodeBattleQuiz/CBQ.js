@@ -27,6 +27,7 @@ import { LeaderboardScene } from "./src/scenes/LeaderboardScene.js";
 import { TimerOverlayScene } from "./src/utils/TimerOverlayScene.js";
 import { SchoolIDOverlay } from "./src/overlay/SchoolIDOverlay.js";
 import { PickupOverlay } from "./src/overlay/PickupOverlay.js";
+import { GoalOverlay } from "./src/overlay/GoalOverlay.js";
 
 // Boot Scene (handles loading with progress bar)
 class BootScene extends Phaser.Scene {
@@ -157,7 +158,7 @@ export default function CodeBattleQuiz() {
         scene: [BootScene, Start, HomeScene, LivingRoomScene, OutsideScene, 
                 SchoolScene, SchoolLobbyScene, SaveSlotsScene, SchoolHallwayScene,
                  QuizGame , MenuScene, CodingGameScene, TaskOverlay,
-                HudOverlay, InventoryOverlay, Comlab1Scene, Comlab2Scene, Comlab3Scene, ClipboardOverlay, StatsOverlay, LeaderboardScene, TimerOverlayScene, SchoolIDOverlay, PickupOverlay],
+                HudOverlay, InventoryOverlay, GoalOverlay, Comlab1Scene, Comlab2Scene, Comlab3Scene, ClipboardOverlay, StatsOverlay, LeaderboardScene, TimerOverlayScene, SchoolIDOverlay, PickupOverlay],
         scale: { mode: Phaser.Scale.NONE, autoCenter: Phaser.Scale.CENTER_BOTH },
         backgroundColor: 0x000000,
         render: { pixelArt: true },

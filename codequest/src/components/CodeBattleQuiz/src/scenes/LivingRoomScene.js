@@ -14,6 +14,7 @@ import { preloadSongUI, createSongUI } from "../utils/songUI";
 import { loadPlayer } from "../utils/playerLoader";
 import { launchHUD } from "../utils/hudUtil.js";
 import { createMenuButton } from "../utils/uiHelpers.js";
+import { completeGoal } from "../utils/GoalManager";
 
 export class LivingRoomScene extends Phaser.Scene {
   constructor() {
@@ -183,6 +184,9 @@ export class LivingRoomScene extends Phaser.Scene {
             this.dialogueText.setText(dialogue.text);
             this.dialogueBubble.setVisible(true);
 
+            // Complete goal
+            completeGoal("talk_to_mother", this);
+
             if (this.dialogueTimer) this.dialogueTimer.remove();
             this.dialogueTimer = this.time.delayedCall(5000, () => {
               this.dialogueBubble.setVisible(false);
@@ -207,8 +211,8 @@ export class LivingRoomScene extends Phaser.Scene {
                 const view = cam.worldView;
                 const clampedX = Phaser.Math.Clamp(targetX, view.x + 105, view.x + view.width - 105);
                 const clampedY = Phaser.Math.Clamp(targetY, view.y + 65, view.y + view.height - 10);
-                this.dialogueBubble.x = Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2);
-                this.dialogueBubble.y = Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2);
+                this.dialogueBubble.x = Math.round(Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2));
+                this.dialogueBubble.y = Math.round(Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2));
                 this.drawBubble(targetX - this.dialogueBubble.x);
             } else if (this.dialogueBubble) {
                 this.dialogueBubble.setPosition(this.mother.x, this.mother.y - 70);
@@ -223,14 +227,6 @@ export class LivingRoomScene extends Phaser.Scene {
     this.songUI = createSongUI(this, "Living Room");
 
     this.input.keyboard.on("keydown-L", async () => {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const userId = storedUser?.id || 1;
-      await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, null, storedUser.inventory, storedUser.flags);
-      console.log(`💾 Player saved in slot ${this.currentSlot}`);
-    });
-
-    this.scene.launch("InventoryOverlay");
-    this.input.keyboard.on("keydown-ESC", () => {
       this.scene.start("SaveSlotsScene", { player: this.player, loadSlot: this.currentSlot });
     });
   }

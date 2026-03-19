@@ -39,8 +39,21 @@ export const getNPCDialogue = (npcData, gameState) => {
     return node.conditions.every(cond => checkCondition(cond, gameState));
   });
 
-  // Return the first valid node (or you could implement priority-based sorting)
-  return validNodes[0] || null;
+  // Sort by priority (higher first) if priority exists, otherwise maintain order
+  validNodes.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+  const node = validNodes[0] || null;
+
+  // Handle RANDOM type if it exists
+  if (node && node.type === 'RANDOM' && Array.isArray(node.pool)) {
+    const randomIndex = Math.floor(Math.random() * node.pool.length);
+    return {
+      ...node,
+      text: node.pool[randomIndex]
+    };
+  }
+
+  return node;
 };
 
 /**

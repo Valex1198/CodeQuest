@@ -376,8 +376,8 @@ export class OutsideScene extends Phaser.Scene {
                 const view = cam.worldView;
                 const clampedX = Phaser.Math.Clamp(targetX, view.x + 105, view.x + view.width - 105);
                 const clampedY = Phaser.Math.Clamp(targetY, view.y + 65, view.y + view.height - 10);
-                this.dialogueBubble.x = Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2);
-                this.dialogueBubble.y = Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2);
+                this.dialogueBubble.x = Math.round(Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2));
+                this.dialogueBubble.y = Math.round(Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2));
                 this.drawBubble(targetX - this.dialogueBubble.x);
             } else if (this.dialogueBubble) {
                 this.dialogueBubble.setPosition(this.sakura.x, this.sakura.y - 70);

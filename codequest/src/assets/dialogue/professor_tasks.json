@@ -1,0 +1,21 @@
+{
+  "npcId": "professor_tasks",
+  "name": "Professor Script",
+  "dialogueNodes": [
+    {
+      "id": "welcome",
+      "text": "Hello, student! Ready to put your coding skills to the test with some real-world tasks?",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "return",
+      "text": "Welcome back! Which coding challenge shall we tackle next?",
+      "conditions": [
+        { "type": "FLAG_EQUALS", "key": "met_professor_tasks", "value": true }
+      ],
+      "priority": 10,
+      "actions": []
+    }
+  ]
+}

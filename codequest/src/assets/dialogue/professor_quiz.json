@@ -1,0 +1,21 @@
+{
+  "npcId": "professor_quiz",
+  "name": "Professor Byte",
+  "dialogueNodes": [
+    {
+      "id": "welcome",
+      "text": "Welcome to the Lab! Are you ready to test your knowledge with some quizzes?",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "return",
+      "text": "Back again? Let's see if you can improve your scores!",
+      "conditions": [
+        { "type": "FLAG_EQUALS", "key": "met_professor_quiz", "value": true }
+      ],
+      "priority": 10,
+      "actions": []
+    }
+  ]
+}

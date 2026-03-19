@@ -30,6 +30,12 @@ export async function launchHUD(scene, player, saveSlot = 1, language = "Python"
         // Launch PickupOverlay (it starts hidden)
         scene.scene.launch("PickupOverlay");
 
+        // Launch InventoryOverlay (starts hidden by default in constructor, but let's be sure)
+        scene.scene.launch("InventoryOverlay");
+
+        // Launch GoalOverlay
+        scene.scene.launch("GoalOverlay");
+
         const hudScene = scene.scene.get("HudOverlay");
 
         hudScene.events.once("create", async () => {

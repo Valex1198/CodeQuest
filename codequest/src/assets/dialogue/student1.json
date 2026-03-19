@@ -9,9 +9,34 @@
       "actions": []
     },
     {
-      "id": "default",
+      "id": "node1",
       "text": "I really need to finish my Python project before the deadline...",
-      "conditions": []
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "node2",
+      "text": "Have you seen the leaderboard? Some people are already level 10!",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "node3",
+      "text": "Coding is tough, but it's so satisfying when the code finally runs.",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "node4",
+      "text": "I'm stuck on a bug in my C++ assignment. It's driving me crazy!",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "node5",
+      "text": "Did you know the school guard loves coffee? I should get him some one day.",
+      "conditions": [],
+      "actions": []
     }
   ]
 }
