@@ -80,14 +80,19 @@
                  "name":"",
                  "properties":[
                         {
+                         "name":"name",
+                         "type":"string",
+                         "value":"portalToHallway"
+                        }, 
+                        {
                          "name":"spawnX",
                          "type":"int",
-                         "value":768
+                         "value":480
                         }, 
                         {
                          "name":"spawnY",
                          "type":"int",
-                         "value":510
+                         "value":450
                         }, 
                         {
                          "name":"targetScene",
@@ -228,6 +233,41 @@
         }, 
         {
          "draworder":"topdown",
+         "id":6,
+         "name":"Guard",
+         "objects":[
+                {
+                 "height":0,
+                 "id":34,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":498.5,
+                 "y":62.1666666666666
+                }, 
+                {
+                 "height":0,
+                 "id":35,
+                 "name":"GuardSpotForRest",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":439.5,
+                 "y":59.5
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":3,
          "name":"Collisions",
          "objects":[
@@ -336,8 +376,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":34,
+ "nextlayerid":7,
+ "nextobjectid":36,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

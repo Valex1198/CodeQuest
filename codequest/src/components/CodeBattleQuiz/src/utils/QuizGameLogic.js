@@ -1,6 +1,7 @@
 // import Phaser from "phaser";
 // --------------------------
 import { updateQuizLevel } from "../utils/saveManager.js";
+import { completeGoal } from "./GoalManager";
 export class QuizGameLogic {
   /**
    * @param {Phaser.Scene} scene
@@ -281,6 +282,7 @@ async endQuiz(isGameOver = false) {
     if (!isGameOver) {
       const correctCount = this.progressMarks.filter(m => m === 1).length;
       const score = Math.round((correctCount / this.totalQuestions) * 100);
+      const passed = score >= 60;
 
       try {
           const storedUser = JSON.parse(localStorage.getItem("user")) || {};
@@ -288,8 +290,13 @@ async endQuiz(isGameOver = false) {
           const slotId = scene.saveSlot ?? 1;
           const language = scene.language ?? "Python";
 
-          await updateQuizLevel(userId, slotId, language, this.level, score);
-          console.log("💾 Quiz score saved successfully!");
+          // Only mark as completed if passed (60% or higher)
+          await updateQuizLevel(userId, slotId, language, this.level, score, passed);
+          console.log(`💾 Quiz score saved! Passed: ${passed} (${score}%)`);
+
+          if (passed && language === "Python" && this.level === 1) {
+            completeGoal("complete_python_1", scene);
+          }
       } catch (err) {
           console.error("❌ Failed to save quiz score:", err);
       }
@@ -306,6 +313,7 @@ async endQuiz(isGameOver = false) {
       scene.scene.launch("ClipboardOverlay", {
           level: this.level,
           score: score,
+          passed: passed,
           answers: answersArray
       });
     }

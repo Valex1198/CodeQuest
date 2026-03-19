@@ -1,0 +1,24 @@
+{
+  "npcId": "school_guard",
+  "name": "School Guard",
+  "dialogueNodes": [
+    {
+      "id": "welcome_id",
+      "text": "Oh, you have an ID. Go ahead, don't be late for your next coding challenge.",
+      "priority": 10,
+      "conditions": [
+        { "type": "HAS_ITEM", "item": "School ID" }
+      ],
+      "actions": [
+        { "type": "SET_FLAG", "key": "met_guard", "value": true }
+      ]
+    },
+    {
+      "id": "restricted_area",
+      "text": "The hallway is off-limits. I don't see a School ID on you. You'll need one to pass.",
+      "priority": 0,
+      "conditions": [],
+      "actions": []
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import Comlab3Bg from "../assets/Comlab3.png";
 import Comlab3Map from "../assets/comlab3.json";
 import Professor1Img from "../assets/Professor1.png";
 import EKeyImg from "../assets/E-Key.png";
+import ProfessorTasksDialogue from "../../../../assets/dialogue/professor_tasks.json";
 import { createMenuButton } from "../utils/uiHelpers.js";
 import { preloadPlayer, updatePlayer } from "../utils/player";
 import { setupPortals, handlePortalUpdate, fadeInFromPortal } from "../utils/PortalManager";
@@ -13,6 +14,7 @@ import { loadPlayer } from "../utils/playerLoader";
 import { launchHUD } from "../utils/hudUtil";
 import { showTaskCompletionOverlay } from "../utils/completeTaskUtil";
 import { openProfessorDialog } from "../utils/professorDialogUtil";
+import { getNPCDialogue, handleDialogueActions } from "../utils/DialogueManager";
 
 export class Comlab3Scene extends Phaser.Scene {
   constructor() {
@@ -20,6 +22,29 @@ export class Comlab3Scene extends Phaser.Scene {
     this.player = null;
     this.currentSlot = null;
     this.language = "Python";
+    this.dialogueTimer = null;
+  }
+
+  drawBubble(arrowX = 0) {
+    if (!this.bubbleBg) return;
+    const graphics = this.bubbleBg;
+    graphics.clear();
+    graphics.fillStyle(0x000000, 0.8);
+    graphics.lineStyle(2, 0xffffff, 1);
+    
+    graphics.fillRoundedRect(-100, -60, 200, 60, 10);
+    graphics.strokeRoundedRect(-100, -60, 200, 60, 10);
+    
+    const arrowSize = 10;
+    const clampedArrowX = Phaser.Math.Clamp(arrowX, -90, 90);
+    
+    graphics.beginPath();
+    graphics.moveTo(clampedArrowX - arrowSize, 0);
+    graphics.lineTo(clampedArrowX + arrowSize, 0);
+    graphics.lineTo(clampedArrowX, arrowSize);
+    graphics.closePath();
+    graphics.fillPath();
+    graphics.strokePath();
   }
 
   preload() {
@@ -83,24 +108,6 @@ export class Comlab3Scene extends Phaser.Scene {
     });
 
     // ----------------------------
-    // E-Key indicator
-    // ----------------------------
-    if (!this.anims.exists("e_key_anim")) {
-      this.anims.create({
-        key: "e_key_anim",
-        frames: this.anims.generateFrameNumbers("EKey", { start: 0, end: 1 }),
-        frameRate: 2,
-        repeat: -1,
-      });
-    }
-
-    this.eKeySprite = this.add
-      .sprite(this.player.x, this.player.y - 40, "EKey")
-      .setDepth(1002)
-      .setVisible(false)
-      .play("e_key_anim");
-
-    // ----------------------------
     // Professor NPC
     // ----------------------------
     if (!this.anims.exists("professor1_idle")) {
@@ -118,6 +125,26 @@ export class Comlab3Scene extends Phaser.Scene {
     this.professor1.play("professor1_idle");
     this.physics.add.collider(this.player, this.professor1);
 
+    // Interaction Prompt
+    this.interactText = this.add.text(this.professor1.x, this.professor1.y - 40, "Press E to talk", {
+      fontSize: "14px",
+      fill: "#ffffff",
+      backgroundColor: "rgba(0,0,0,0.6)",
+      padding: { x: 4, y: 2 }
+    }).setOrigin(0.5).setVisible(false).setDepth(1002);
+
+    // Dialogue Bubble
+    this.dialogueBubble = this.add.container(this.professor1.x, this.professor1.y - 70).setVisible(false).setDepth(15);
+    this.bubbleBg = this.add.graphics();
+    this.drawBubble(0);
+    this.dialogueText = this.add.text(0, -30, "", {
+      fontSize: "12px",
+      fill: "#ffffff",
+      wordWrap: { width: 180 },
+      align: "center"
+    }).setOrigin(0.5);
+    this.dialogueBubble.add([this.bubbleBg, this.dialogueText]);
+
     // ----------------------------
     // E → Professor Dialog
     // ----------------------------
@@ -130,10 +157,35 @@ export class Comlab3Scene extends Phaser.Scene {
       );
 
       if (dist <= 60) {
-        openProfessorDialog(this, {
-          slot: this.currentSlot,
-          language: this.language,
-        });
+        if (this.dialogueBubble.visible) {
+          this.dialogueBubble.setVisible(false);
+          if (this.dialogueTimer) this.dialogueTimer.remove();
+          this.openTaskMenu();
+        } else {
+          const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+          const gameState = {
+            flags: storedUser.flags || {},
+            quests: storedUser.quests || {},
+            inventory: storedUser.inventory || [],
+            user: storedUser
+          };
+
+          const dialogue = getNPCDialogue(ProfessorTasksDialogue, gameState);
+          if (dialogue) {
+            this.dialogueText.setText(dialogue.text);
+            this.dialogueBubble.setVisible(true);
+            
+            if (!storedUser.flags) storedUser.flags = {};
+            storedUser.flags.met_professor_tasks = true;
+            localStorage.setItem("user", JSON.stringify(storedUser));
+
+            if (this.dialogueTimer) this.dialogueTimer.remove();
+            this.dialogueTimer = this.time.delayedCall(2000, () => {
+              this.dialogueBubble.setVisible(false);
+              this.openTaskMenu();
+            });
+          }
+        }
       }
     });
 
@@ -153,13 +205,43 @@ export class Comlab3Scene extends Phaser.Scene {
     if (data?.taskCompleted) {
       showTaskCompletionOverlay(this, data.taskCompleted);
     }
+
+    // Sync UI position
+    this.events.on("postupdate", () => {
+        if (this.professor1 && this.professor1.body) {
+            if (this.interactText) this.interactText.setPosition(this.professor1.x, this.professor1.y - 40);
+            if (this.dialogueBubble && this.dialogueBubble.visible) {
+                const targetX = this.professor1.x;
+                const targetY = this.professor1.y - 70;
+                const cam = this.cameras.main;
+                const view = cam.worldView;
+                const clampedX = Phaser.Math.Clamp(targetX, view.x + 105, view.x + view.width - 105);
+                const clampedY = Phaser.Math.Clamp(targetY, view.y + 65, view.y + view.height - 10);
+                
+                this.dialogueBubble.x = Math.round(Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2));
+                this.dialogueBubble.y = Math.round(Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2));
+                this.drawBubble(targetX - this.dialogueBubble.x);
+            } else if (this.dialogueBubble) {
+                this.dialogueBubble.setPosition(this.professor1.x, this.professor1.y - 70);
+                this.drawBubble(0);
+            }
+            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.professor1.x, this.professor1.y);
+            this.interactText.setVisible(dist < 60 && !this.dialogueBubble.visible);
+        }
+    });
+  }
+
+  openTaskMenu() {
+    openProfessorDialog(this, {
+      slot: this.currentSlot,
+      language: this.language,
+    });
   }
 
   update() {
     if (!this.player?.body) return;
 
     updatePlayer(this.player);
-
     this.player.setDepth(this.player.y);
 
     // Guard professor1
@@ -169,18 +251,6 @@ export class Comlab3Scene extends Phaser.Scene {
 
     if (this.portalZones && this.player.keys) {
         handlePortalUpdate(this, this.player, this.player.keys);
-    }
-
-    if (this.eKeySprite) {
-        const dist = this.professor1 ? Phaser.Math.Distance.Between(
-            this.player.x,
-            this.player.y,
-            this.professor1.x,
-            this.professor1.y
-        ) : 0;
-
-        this.eKeySprite.setVisible(dist <= 60);
-        this.eKeySprite.setPosition(this.player.x, this.player.y - 40);
     }
 }
   

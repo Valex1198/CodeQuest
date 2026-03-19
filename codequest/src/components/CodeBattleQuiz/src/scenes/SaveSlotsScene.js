@@ -79,9 +79,10 @@ export class SaveSlotsScene extends Phaser.Scene {
         let targetScene, playerData;
 
         if (mode === "new") {
-          // NEW GAME: reset quiz & coding progress
+          // NEW GAME: reset quiz & coding progress & inventory
           targetScene = defaultScene;
           playerData = { x: 238, y: 270 };
+          // isNewGame = true (last param)
           await setSave(user.id, slotId, { scene: { key: targetScene } }, playerData, selectedLanguage, null, null, true);
 
           // Update slot text

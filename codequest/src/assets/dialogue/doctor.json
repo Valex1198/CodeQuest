@@ -1,0 +1,33 @@
+{
+  "npcId": "doctor_house",
+  "name": "Dr. House",
+  "dialogueNodes": [
+    {
+      "id": "quest_complete",
+      "text": "Thank you for bringing those herbs! You've saved many lives. Here's your reward.",
+      "conditions": [
+        { "type": "QUEST_STATUS", "id": "gather_herbs", "status": "COMPLETED" },
+        { "type": "FLAG_EQUALS", "key": "doctor_rewarded", "value": false }
+      ],
+      "actions": [
+        { "type": "GIVE_ITEM", "item": "super_potion" },
+        { "type": "SET_FLAG", "key": "doctor_rewarded", "value": true }
+      ]
+    },
+    {
+      "id": "first_meeting",
+      "text": "Welcome to the clinic. I haven't seen you around here.",
+      "conditions": [
+        { "type": "FLAG_EQUALS", "key": "met_doctor", "value": false }
+      ],
+      "actions": [
+        { "type": "SET_FLAG", "key": "met_doctor", "value": true }
+      ]
+    },
+    {
+      "id": "default_greeting",
+      "text": "Stay safe out there. Coding is dangerous work.",
+      "conditions": [] 
+    }
+  ]
+}

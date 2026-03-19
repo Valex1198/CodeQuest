@@ -7,6 +7,10 @@ import TaxiDrivingPng from "../assets/Taxidriving.png";
 import TaxiDrivingJson from "../assets/Taxidriving.json";
 import BirdPng from "../assets/BirdSprite.png";
 import BirdJson from "../assets/BirdSprite.json";
+import GuardPng from "../assets/Guard.png";
+import GuardJson from "../assets/Guard.json";
+import GuardDialogue from "../../../../assets/dialogue/guard.json";
+import { getNPCDialogue } from "../utils/DialogueManager";
 import { Bird } from "../utils/Bird";
 import { preloadPlayer, updatePlayer } from "../utils/player";
 import { setupPortals, handlePortalUpdate, fadeInFromPortal } from "../utils/PortalManager";
@@ -16,12 +20,39 @@ import { preloadSongUI, createSongUI } from "../utils/songUI";
 import { loadPlayer } from "../utils/playerLoader";
 import { launchHUD } from "../utils/hudUtil.js";
 import { createMenuButton } from "../utils/uiHelpers.js";
+import { hasItem, removeItem, getInventory } from "../utils/InventoryManager.js";
+import { completeGoal } from "../utils/GoalManager";
 
 export class SchoolScene extends Phaser.Scene {
   constructor() {
     super({ key: "SchoolScene" });
     this.player = null;
     this.currentSlot = null;
+    this.isGuardChecking = false;
+    this.guardApproved = false;
+    this.dialogueTimer = null;
+  }
+
+  drawBubble(arrowX = 0) {
+    if (!this.bubbleBg) return;
+    const graphics = this.bubbleBg;
+    graphics.clear();
+    graphics.fillStyle(0x000000, 0.8);
+    graphics.lineStyle(2, 0xffffff, 1);
+    
+    graphics.fillRoundedRect(-100, -60, 200, 60, 10);
+    graphics.strokeRoundedRect(-100, -60, 200, 60, 10);
+    
+    const arrowSize = 10;
+    const clampedArrowX = Phaser.Math.Clamp(arrowX, -90, 90);
+    
+    graphics.beginPath();
+    graphics.moveTo(clampedArrowX - arrowSize, 0);
+    graphics.lineTo(clampedArrowX + arrowSize, 0);
+    graphics.lineTo(clampedArrowX, arrowSize);
+    graphics.closePath();
+    graphics.fillPath();
+    graphics.strokePath();
   }
 
   preload() {
@@ -29,12 +60,17 @@ export class SchoolScene extends Phaser.Scene {
     this.load.image("School", SchoolBg);
     this.load.atlas("idleTaxi", TaxiIdlePng, TaxiIdleJson);
     this.load.atlas("drivingTaxi", TaxiDrivingPng, TaxiDrivingJson);
+    this.load.atlas("guard", GuardPng, GuardJson);
     Bird.preload(this, BirdPng, BirdJson);
     preloadPlayer(this);
     preloadSongUI(this);
   }
 
   async create(data) {
+    // Reset state for new slot load
+    this.isGuardChecking = false;
+    this.guardApproved = false;
+
     const canvasWidth = this.sys.game.config.width;
     const canvasHeight = this.sys.game.config.height;
 
@@ -57,7 +93,7 @@ export class SchoolScene extends Phaser.Scene {
         this.birds.add(bird);
     });
 
-    // Create taxi animations if they don't exist
+    // Create animations
     if (!this.anims.exists("taxi_idle")) {
       this.anims.create({
         key: "taxi_idle",
@@ -85,6 +121,20 @@ export class SchoolScene extends Phaser.Scene {
       });
     }
 
+    if (!this.anims.exists("guard_idle")) {
+      this.anims.create({
+        key: "guard_idle",
+        frames: this.anims.generateFrameNames("guard", {
+          prefix: "Guard ",
+          suffix: ".aseprite",
+          start: 0,
+          end: 5,
+        }),
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
+
     // Default player position
     const defaultX = data?.x ?? 238;
     const defaultY = data?.y ?? 270;
@@ -92,9 +142,121 @@ export class SchoolScene extends Phaser.Scene {
     // Load player
     const { player, slot, language, saveData } = await loadPlayer(this, data, defaultX, defaultY);
     this.player = player;
+    this.player.setDepth(10); // Ensure player is on top
     this.currentSlot = slot;
     this.language = language;
+
+    // Fix Camera Delay: Increase lerp to 0.8 for responsive movement
+    this.cameras.main.startFollow(this.player, true, 0.8, 0.8);
+
     this.physics.add.collider(this.player, this.collisionZones);
+
+    // Guard NPC from Tiled
+    const guardLayer = map.getObjectLayer("Guard")?.objects || [];
+    const guardObj = guardLayer.find(obj => obj.name === "") || guardLayer[0];
+    const restSpotObj = guardLayer.find(obj => obj.name === "GuardSpotForRest");
+    
+    this.guardRestSpot = restSpotObj ? { x: restSpotObj.x, y: restSpotObj.y } : { x: 439, y: 59 };
+    const guardX = guardObj?.x ?? 446;
+    const guardY = guardObj?.y ?? 68;
+
+    this.guard = this.physics.add.sprite(guardX, guardY, "guard");
+    this.guard.setDepth(5); // Lower depth than player
+    this.guard.play("guard_idle");
+    this.guard.setImmovable(true);
+    if (this.guard.body.setAllowGravity) this.guard.body.setAllowGravity(false);
+    this.physics.add.collider(this.player, this.guard);
+
+    // Guard Interaction Prompt
+    this.interactText = this.add.text(guardX, guardY - 40, "Press E to talk", {
+      fontSize: "14px",
+      fill: "#ffffff",
+      backgroundColor: "rgba(0,0,0,0.6)",
+      padding: { x: 4, y: 2 }
+    }).setOrigin(0.5).setVisible(false);
+
+    // Dialogue Bubble
+    this.dialogueBubble = this.add.container(guardX, guardY - 70).setVisible(false).setDepth(15);
+    this.bubbleBg = this.add.graphics();
+    this.drawBubble(0);
+    this.dialogueText = this.add.text(0, -30, "", {
+      fontSize: "12px",
+      fill: "#ffffff",
+      wordWrap: { width: 180 },
+      align: "center"
+    }).setOrigin(0.5);
+    this.dialogueBubble.add([this.bubbleBg, this.dialogueText]);
+
+    // Portals initialization
+    setupPortals(this, map, this.player);
+
+    // Find the hallway portal and disable it initially
+    this.hallwayPortal = this.portalZones.getChildren().find(
+      (p) => p.properties?.name === "portalToHallway"
+    );
+    if (this.hallwayPortal && this.hallwayPortal.body) {
+      this.hallwayPortal.body.enable = false;
+    }
+
+    // Check if guard should be at rest
+    const storedUserData = JSON.parse(localStorage.getItem("user")) || {};
+    if (storedUserData.flags?.guard_gone) {
+      this.guardApproved = true;
+      this.guard.setPosition(this.guardRestSpot.x, this.guardRestSpot.y);
+      if (this.hallwayPortal && this.hallwayPortal.body) {
+        this.hallwayPortal.body.enable = true;
+      }
+    }
+
+    // Handle Interaction
+    this.input.keyboard.on("keydown-E", () => {
+      if (this.isGuardChecking || !this.guard) return;
+      
+      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.guard.x, this.guard.y);
+      if (dist < 60) {
+        if (this.dialogueBubble.visible) {
+          this.dialogueBubble.setVisible(false);
+          if (this.dialogueTimer) this.dialogueTimer.remove();
+        } else {
+          // If guard is approved/gone, show rest flavour text
+          if (this.guardApproved) {
+            this.dialogueText.setText("Mmm... this coffee is exactly what I needed. Enjoy the hallway!");
+            this.dialogueBubble.setVisible(true);
+            
+            if (this.dialogueTimer) this.dialogueTimer.remove();
+            this.dialogueTimer = this.time.delayedCall(5000, () => {
+              this.dialogueBubble.setVisible(false);
+            });
+            return;
+          }
+
+          // Otherwise check for ID
+          const hasId = hasItem("School ID");
+          if (hasId) {
+            this.startGuardCheckSequence();
+          } else {
+            const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+            const gameState = {
+              flags: storedUser.flags || {},
+              quests: storedUser.quests || {},
+              inventory: storedUser.inventory || [],
+              user: storedUser
+            };
+
+            const dialogue = getNPCDialogue(GuardDialogue, gameState);
+            if (dialogue) {
+              this.dialogueText.setText(dialogue.text);
+              this.dialogueBubble.setVisible(true);
+
+              if (this.dialogueTimer) this.dialogueTimer.remove();
+              this.dialogueTimer = this.time.delayedCall(5000, () => {
+                this.dialogueBubble.setVisible(false);
+              });
+            }
+          }
+        }
+      }
+    });
 
     // Static taxi if saved here
     if (saveData?.taxi?.scene === "SchoolScene" && !data?.arrivingByTaxi) {
@@ -136,7 +298,7 @@ export class SchoolScene extends Phaser.Scene {
       taxi.setSize(96, 48).setOffset(4, 12);
 
       this.cameras.main.stopFollow();
-      this.cameras.main.startFollow(taxi, true, 0.1, 0.1);
+      this.cameras.main.startFollow(taxi, true, 0.8, 0.8);
 
       // Start transparent for fade-in arrival
       taxi.setAlpha(0);
@@ -144,7 +306,7 @@ export class SchoolScene extends Phaser.Scene {
           targets: taxi,
           alpha: 1,
           duration: 1000
-      });
+        });
 
       this.tweens.add({
         targets: taxi,
@@ -152,9 +314,22 @@ export class SchoolScene extends Phaser.Scene {
         y: 255,
         duration: 5000, // Slower arrival speed to match Outside
         ease: "Linear",
-        onComplete: () => {
+        onComplete: async () => {
           taxi.play("taxi_idle");
           
+          // Auto-save upon arrival
+          const storedUser = JSON.parse(localStorage.getItem("user"));
+          const userId = storedUser?.id || 1;
+          const taxiData = {
+              scene: this.scene.key,
+              x: taxi.x,
+              y: taxi.y
+          };
+          await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData, storedUser.inventory, storedUser.flags);
+          console.log("💾 Auto-saved arrival at School Scene.");
+
+          completeGoal("reach_school", this);
+
           // Player "gets out"
           this.time.delayedCall(500, () => {
             this.player.setVisible(true);
@@ -168,7 +343,7 @@ export class SchoolScene extends Phaser.Scene {
               duration: 500,
               onComplete: () => {
                 this.isAutoMoving = false; // Disable auto-move
-                this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+                this.cameras.main.startFollow(this.player, true, 0.8, 0.8);
                 // Enable collision now that player is out
                 this.physics.add.collider(this.player, taxi);
                 
@@ -190,15 +365,10 @@ export class SchoolScene extends Phaser.Scene {
       fadeInFromPortal(this, data);
     }
 
-    // Portals
-    setupPortals(this, map, this.player);
     createMenuButton(this, "🏠", { xOffset: 50, yOffset: 50, fontSize: 32 });
     // Song UI
     this.songUI = createSongUI(this, " School ");
     await launchHUD(this, this.player, this.currentSlot, this.language);
-
-    // HUD overlay
-    
 
     // Keybind ENTER for returning
     this.input.keyboard.on("keydown-ENTER", () => {
@@ -228,13 +398,13 @@ export class SchoolScene extends Phaser.Scene {
                 duration: 800,
                 ease: "Linear",
                 onComplete: () => {
-                    console.log("?? Returning to the city...");
+                    console.log("🚕 Returning to the city...");
                     this.isReturning = true;
                     this.player.setVisible(false);
                     if (this.player.body) this.player.body.enable = false;
                     
                     this.cameras.main.stopFollow();
-                    this.cameras.main.startFollow(this.taxi, true, 0.1, 0.1);
+                    this.cameras.main.startFollow(this.taxi, true, 0.8, 0.8);
                     
                     this.taxi.play("taxi_driving");
                     if (this.returnText) this.returnText.destroy();
@@ -255,8 +425,8 @@ export class SchoolScene extends Phaser.Scene {
           y: this.taxi.y
       } : null;
 
-      await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData);
-      console.log(`?? Player and Taxi saved in slot ${this.currentSlot}`);
+      await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData, storedUser.inventory, storedUser.flags);
+      console.log(`💾 Player, Taxi, and Flags saved in slot ${this.currentSlot}`);
     });
 
     // ESC → go to SaveSlotsScene
@@ -266,10 +436,133 @@ export class SchoolScene extends Phaser.Scene {
         loadSlot: this.currentSlot,
       });
     });
+
+    // Sync UI position listener
+    this.events.on("postupdate", () => {
+        if (this.guard && this.guard.active) {
+            if (this.interactText) this.interactText.setPosition(this.guard.x, this.guard.y - 40);
+            if (this.dialogueBubble && this.dialogueBubble.visible) {
+                const targetX = this.guard.x;
+                const targetY = this.guard.y - 70;
+                const cam = this.cameras.main;
+                const view = cam.worldView;
+                const clampedX = Phaser.Math.Clamp(targetX, view.x + 105, view.x + view.width - 105);
+                const clampedY = Phaser.Math.Clamp(targetY, view.y + 65, view.y + view.height - 10);
+                this.dialogueBubble.x = Math.round(Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2));
+                this.dialogueBubble.y = Math.round(Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2));
+                this.drawBubble(targetX - this.dialogueBubble.x);
+            } else if (this.dialogueBubble) {
+                this.dialogueBubble.setPosition(this.guard.x, this.guard.y - 70);
+                this.drawBubble(0);
+            }
+            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.guard.x, this.guard.y);
+            this.interactText.setVisible(dist < 60 && !this.dialogueBubble.visible && !this.isGuardChecking);
+        }
+    });
+  }
+
+  startGuardCheckSequence() {
+    this.isGuardChecking = true;
+    
+    // First message: Stop and notice ID
+    this.dialogueText.setText("Stop right there! Hallway is restricted.");
+    this.dialogueBubble.setVisible(true);
+
+    this.time.delayedCall(2000, () => {
+      this.dialogueText.setText("Hmm? What's that in your hand? A School ID?");
+      
+      // Show the ID Overlay (Small scale, no dimming)
+      const schoolIDScene = this.scene.get("SchoolIDOverlay");
+      if (schoolIDScene && typeof schoolIDScene.showID === "function") {
+          schoolIDScene.showID(0.5, false);
+      }
+
+      this.time.delayedCall(2000, () => {
+        this.dialogueText.setText("Hand it over. I need to verify your credentials.");
+        
+        // Transaction simulation: Remove ID from inventory
+        const inv = getInventory();
+        const idIndex = inv.findIndex(item => item.name === "School ID" || item === "School ID");
+        if (idIndex !== -1) {
+          removeItem(idIndex);
+          console.log("School ID removed for checking.");
+        }
+
+        this.time.delayedCall(2500, () => {
+          this.dialogueText.setText("Scanning the barcode... verifying database entries...");
+          
+          this.time.delayedCall(3000, () => {
+            this.dialogueText.setText("The photo matches... and the encryption seems valid.");
+            
+            this.time.delayedCall(2500, () => {
+              this.dialogueText.setText("Alright, student. Everything is in order.");
+              this.guardApproved = true;
+
+              this.time.delayedCall(2000, () => {
+                this.dialogueText.setText("You may pass. I'm going to take my break now.");
+                
+                // Hide ID finally
+                if (schoolIDScene && typeof schoolIDScene.hideID === "function") {
+                    schoolIDScene.hideID();
+                }
+
+                this.time.delayedCall(2500, () => {
+                  this.dialogueBubble.setVisible(false);
+
+                  // 1. Fade out at current spot
+                  this.tweens.add({
+                    targets: this.guard,
+                    alpha: 0,
+                    duration: 1000,
+                    onComplete: () => {
+                      // 2. Teleport to rest spot
+                      this.guard.setPosition(this.guardRestSpot.x, this.guardRestSpot.y);
+                      
+                      // 3. Fade back in
+                      this.tweens.add({
+                        targets: this.guard,
+                        alpha: 1,
+                        duration: 1000,
+                        onComplete: () => {
+                          if (this.hallwayPortal && this.hallwayPortal.body) {
+                            this.hallwayPortal.body.enable = true;
+                            console.log("Hallway portal enabled!");
+                          }
+
+                          // Update flags in current session only (let the player choose when to save)
+                          const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+                          if (!storedUser.flags) storedUser.flags = {};
+                          storedUser.flags.guard_gone = true;
+                          localStorage.setItem("user", JSON.stringify(storedUser));
+                          
+                          completeGoal("pass_guard", this);
+
+                          this.isGuardChecking = false;
+                          
+                          // Show final rest flavour text
+                          this.dialogueText.setText("Ah, coffee time. Don't cause any trouble in the hallway!");
+                          this.dialogueBubble.setVisible(true);
+                          this.time.delayedCall(3000, () => {
+                            this.dialogueBubble.setVisible(false);
+                          });
+                        },
+                      });
+                    },
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
   }
 
   update() {
     if (!this.player || !this.player.body) return;
+
+    // Always sync shadow and handle controls if not auto-moving or returning
+    updatePlayer(this.player, 200, this.isReturning || this.isAutoMoving || this.isGuardChecking);
 
     // Proximity check for return prompt
     if (this.taxi && this.returnText && !this.isReturning) {
@@ -294,7 +587,7 @@ export class SchoolScene extends Phaser.Scene {
         }
 
         if (this.taxi.x < -100) {
-            console.log("?? Heading back to City...");
+            console.log("🚕 Heading back to City...");
             this.scene.start("OutsideScene", {
                 loadSlot: this.currentSlot,
                 returningByTaxi: true,
@@ -303,9 +596,6 @@ export class SchoolScene extends Phaser.Scene {
             });
             this.isReturning = false;
         }
-    } else if (!this.isAutoMoving) {
-        // Only update manual player controls if not auto-moving
-        updatePlayer(this.player);
     }
 
     // Update portals safely

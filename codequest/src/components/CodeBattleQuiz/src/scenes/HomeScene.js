@@ -9,6 +9,11 @@ import { preloadSongUI, createSongUI } from "../utils/songUI";
 import { loadPlayer } from "../utils/playerLoader";
 import { createMenuButton } from "../utils/uiHelpers.js";
 import { createMessageBox, showTutorialSequence } from "../utils/uiHelpers.js";
+import { launchHUD, showPickup } from "../utils/hudUtil.js";
+import { addItem } from "../utils/InventoryManager.js";
+import SchoolIDImg from "../assets/SchoolID.png";
+import SmallIDImg from "../assets/Small_ID.png";
+
 export class HomeScene extends Phaser.Scene {
   constructor() {
     super({ key: "HomeScene" });
@@ -18,11 +23,14 @@ export class HomeScene extends Phaser.Scene {
     this.portalZones = null;
     this.enterText = null;
     this.activePortal = null;
+    this.schoolID = null;
   }
 
   preload() {
     this.load.tilemapTiledJSON("home", homeMap);
     this.load.image("Home", Homebg);
+    this.load.image("SchoolIDItem", SchoolIDImg);
+    this.load.image("SmallID", SmallIDImg);
     preloadPlayer(this);
     preloadSongUI(this);
   }
@@ -46,7 +54,7 @@ export class HomeScene extends Phaser.Scene {
     // -----------------------------
     // Load player + language
     // -----------------------------
-    const { player, slot, language } = await loadPlayer(this, data, defaultX, defaultY);
+    const { player, slot, language, saveData } = await loadPlayer(this, data, defaultX, defaultY);
     if (!player) {
       console.error("Player failed to load!");
       return;
@@ -54,12 +62,65 @@ export class HomeScene extends Phaser.Scene {
     this.player = player;
     this.currentSlot = slot;
     this.language = language || "Python";
+    this.saveData = saveData;
+
+    const storedUser = JSON.parse(localStorage.getItem("user")) || { username: "Player" };
 
     console.log("✅ Player loaded:", this.player);
-    console.log("💾 Current save slot:", this.currentSlot);
-    console.log("🌐 Player language:", this.language);
 
     this.physics.add.collider(this.player, this.collisionZones);
+
+    // -----------------------------
+    // School ID Pickup
+    // -----------------------------
+    const idSpot = map.getObjectLayer("smallidspot")?.objects[0];
+    const hasID = storedUser.inventory?.some(item => item.name === "School ID");
+
+    if (idSpot && !hasID) {
+      this.schoolID = this.physics.add.sprite(idSpot.x, idSpot.y, "SmallID");
+      this.schoolID.setScale(1.0); 
+      this.schoolID.setDepth(5);
+      
+      // Floating animation
+      this.tweens.add({
+        targets: this.schoolID,
+        y: idSpot.y - 5,
+        duration: 1000,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut"
+      });
+
+      this.interactText = this.add.text(idSpot.x, idSpot.y - 20, "Press E to pick up", {
+        fontSize: "12px",
+        fill: "#ffffff",
+        backgroundColor: "rgba(0,0,0,0.6)",
+        padding: { x: 4, y: 2 }
+      }).setOrigin(0.5).setVisible(false).setDepth(100);
+
+      this.input.keyboard.on("keydown-E", async () => {
+        if (!this.schoolID || !this.schoolID.active) return;
+        
+        const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.schoolID.x, this.schoolID.y);
+        if (dist < 50) {
+          // Add to inventory logic using InventoryManager
+          const success = await addItem({ name: "School ID", icon: "SchoolIDItem" });
+
+          if (success) {
+            // Visual feedback
+            showPickup(this, "School ID", "SchoolIDItem");
+            if (this.schoolID) {
+              this.schoolID.destroy();
+              this.schoolID = null;
+            }
+            if (this.interactText) {
+              this.interactText.destroy();
+              this.interactText = null;
+            }
+          }
+        }
+      });
+    }
 
     // Fade in if from portal
     if (data?.fromPortal) fadeInFromPortal(this, data);
@@ -85,33 +146,7 @@ export class HomeScene extends Phaser.Scene {
     // -----------------------------
     // HUD overlay
     // -----------------------------
-    const storedUser = JSON.parse(localStorage.getItem("user")) || { username: "Player" };
-
-    if (!this.scene.isActive("HudOverlay")) {
-      this.scene.launch("HudOverlay", {
-        player: this.player,
-        playerName: storedUser.username,
-        saveSlot: this.currentSlot,
-        language: this.language
-      });
-
-      this.hudScene = this.scene.get("HudOverlay");
-
-      this.hudScene.events.once("create", async () => {
-        this.hudScene.saveSlot = this.currentSlot;
-        this.hudScene.language = this.language;
-        await this.hudScene.updateTotalScore();
-      });
-
-    } else {
-      this.hudScene = this.scene.get("HudOverlay");
-      this.hudScene.saveSlot = this.currentSlot;
-      this.hudScene.language = this.language;
-      await this.hudScene.updateTotalScore();
-    }
-
-    this.scene.setVisible(true, "HudOverlay");
-    this.scene.bringToTop("HudOverlay");
+    await launchHUD(this, this.player, this.currentSlot, this.language);
 
     console.log("👀 HudOverlay launched and brought to top");
 
@@ -121,13 +156,19 @@ export class HomeScene extends Phaser.Scene {
     this.input.keyboard.on("keydown-L", async () => {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const userId = storedUser?.id || 1;
-      await setSave(userId, this.currentSlot, this, this.player, this.language);
-      console.log(`💾 Player saved in slot ${this.currentSlot}`);
+      
+      // Preserve taxi data in HomeScene saves
+      const taxiData = this.saveData?.taxi || null;
+
+      await setSave(userId, this.currentSlot, this, this.player, this.language, null, null, false, taxiData);
+      console.log(`💾 Player (and preserved Taxi data) saved in slot ${this.currentSlot}`);
     });
 
     // -----------------------------
     // ESC → SaveSlotsScene
     // -----------------------------
+    this.scene.launch("InventoryOverlay");
+
     this.input.keyboard.on("keydown-ESC", () => {
       this.scene.start("SaveSlotsScene", { player: this.player, loadSlot: this.currentSlot });
     });
@@ -137,6 +178,11 @@ export class HomeScene extends Phaser.Scene {
     if (!this.player || !this.player.body) return;
 
     updatePlayer(this.player);
+
+    if (this.schoolID && this.interactText) {
+      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.schoolID.x, this.schoolID.y);
+      this.interactText.setVisible(dist < 50);
+    }
 
     if (this.portalZones && this.enterText && this.player.keys) {
       handlePortalUpdate(this, this.player, this.player.keys);

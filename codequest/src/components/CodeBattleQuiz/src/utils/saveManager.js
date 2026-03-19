@@ -88,7 +88,10 @@ export async function setSave(
   quiz = null,
   codingTasks = null,
   isNewGame = false,
-  taxi = null
+  taxi = null,
+  inventory = null,
+  flags = null,
+  goals = null
 ) {
   const now = new Date();
   const formattedDate = `${String(now.getMonth() + 1).padStart(2, "0")}/${String(
@@ -119,13 +122,20 @@ export async function setSave(
   saveData.date = formattedDate;
   saveData.language = language;
 
-  // Reset quiz and coding tasks if isNewGame
+  // Reset progress and taxi if isNewGame
   if (isNewGame) {
     saveData.quiz = createDefaultQuizSave();
     saveData.codingTasks = {};
+    saveData.inventory = [];
+    saveData.flags = {};
+    saveData.goals = {};
+    saveData.taxi = null; // Ensure taxi is reset to its default Outside location
   } else {
     saveData.quiz = quiz || saveData.quiz || createDefaultQuizSave();
     saveData.codingTasks = codingTasks || saveData.codingTasks || {};
+    saveData.inventory = inventory || saveData.inventory || [];
+    saveData.flags = flags || saveData.flags || {};
+    saveData.goals = goals || saveData.goals || {};
   }
 
   try {
@@ -192,14 +202,19 @@ export async function initPlayer(scene, data, defaultX, defaultY) {
 // --------------------------------------------------
 // UPDATE QUIZ LEVEL PROGRESS
 // --------------------------------------------------
-export async function updateQuizLevel(userId, slotId, language, level, score) {
+export async function updateQuizLevel(userId, slotId, language, level, score, completed = true) {
   const saveData = await getSave(userId, slotId);
   if (!saveData) return;
 
   if (!saveData.quiz) saveData.quiz = {};
   if (!saveData.quiz[language]) saveData.quiz[language] = {};
 
-  saveData.quiz[language][level] = { completed: true, score };
+  // If already completed with a higher score, keep the higher score but update status
+  const existing = saveData.quiz[language][level] || { completed: false, score: 0 };
+  const finalCompleted = existing.completed || completed;
+  const finalScore = Math.max(existing.score, score);
+
+  saveData.quiz[language][level] = { completed: finalCompleted, score: finalScore };
 
   await setSave(userId, slotId, null, null, saveData.language ?? language, saveData.quiz);
 }

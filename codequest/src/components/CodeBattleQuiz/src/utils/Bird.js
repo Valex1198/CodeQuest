@@ -7,6 +7,8 @@ export class Bird extends Phaser.GameObjects.Sprite {
         // Add shadow before the bird so it's behind/underneath
         this.shadow = scene.add.ellipse(x, y, 12, 6, 0x000000, 0.3);
         this.groundY = y; // Save ground level
+        this.initialX = x; // Save initial x position
+        this.initialY = y; // Save initial y position
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -20,6 +22,7 @@ export class Bird extends Phaser.GameObjects.Sprite {
         this.setTint(Phaser.Utils.Array.GetRandom(colors));
 
         this.isFlyingAway = false;
+        this.isLanding = false;
         this.startBehaviorLoop();
     }
 
@@ -55,7 +58,7 @@ export class Bird extends Phaser.GameObjects.Sprite {
     }
 
     startBehaviorLoop() {
-        if (this.isFlyingAway) return;
+        if (this.isFlyingAway || this.isLanding) return;
 
         const rand = Math.random();
         
@@ -69,12 +72,12 @@ export class Bird extends Phaser.GameObjects.Sprite {
         }
 
         this.scene.time.delayedCall(Phaser.Math.Between(2000, 5000), () => {
-            this.startBehaviorLoop();
+            if (this.active) this.startBehaviorLoop();
         }, [], this);
     }
 
     wander() {
-        if (this.isFlyingAway) return;
+        if (this.isFlyingAway || this.isLanding) return;
         
         const distance = Phaser.Math.Between(30, 60);
         const direction = Math.random() < 0.5 ? -1 : 1; 
@@ -92,7 +95,7 @@ export class Bird extends Phaser.GameObjects.Sprite {
             duration: 600,
             ease: "Linear",
             onComplete: () => {
-                if (!this.isFlyingAway) {
+                if (!this.isFlyingAway && !this.isLanding && this.active) {
                     this.play("bird_idle");
                     if (Math.random() < 0.5) this.setFlipX(!this.flipX);
                 }
@@ -121,7 +124,7 @@ export class Bird extends Phaser.GameObjects.Sprite {
     }
 
     update(player, taxi) {
-        if (this.isFlyingAway) return;
+        if (!this.active || this.isFlyingAway) return;
 
         // Keep shadow pinned to ground level
         if (this.shadow) {
@@ -132,54 +135,131 @@ export class Bird extends Phaser.GameObjects.Sprite {
         // Check distance to player
         if (player) {
             const distToPlayer = Phaser.Math.Distance.Between(player.x, player.y, this.x, this.y);
-            if (distToPlayer < 60) {
-                this.flyAway();
+            if (distToPlayer < 70) {
+                this.flyAway(player.x);
                 return;
             }
         }
 
         // Check distance to taxi
-        if (taxi && taxi.visible) {
+        if (taxi && (taxi.visible || taxi.alpha > 0)) {
             const distToTaxi = Phaser.Math.Distance.Between(taxi.x, taxi.y, this.x, this.y);
-            if (distToTaxi < 80) { // Taxis are bigger, so larger scare radius
-                this.flyAway();
+            if (distToTaxi < 120) { // Taxis are big and loud, larger scare radius
+                this.flyAway(taxi.x);
             }
         }
     }
 
-    flyAway() {
+    flyAway(scareX) {
+        // Prevent multiple triggers if already flying
+        if (this.isFlyingAway) return;
+
         this.isFlyingAway = true;
+        this.isLanding = false; 
         this.play("bird_flying");
+
+        // Stop any current walking/idle tweens
+        this.scene.tweens.killTweensOf(this);
+        if (this.shadow) this.scene.tweens.killTweensOf(this.shadow);
         
-        const flyDir = Math.random() < 0.5 ? -1 : 1;
-        const targetX = this.x + (Phaser.Math.Between(100, 300) * flyDir);
-        const targetY = this.y - 400;
+        // Determine flight direction (away from the player/taxi)
+        let flyDir = Math.random() < 0.5 ? -1 : 1;
+        if (scareX !== undefined) {
+            flyDir = this.x > scareX ? 1 : -1;
+        }
+
+        // Much wider horizontal distance for a shallow angle
+        const targetX = this.x + (Phaser.Math.Between(400, 600) * flyDir);
+        const targetY = this.y - 450;
+        const flightDuration = 5000;
 
         this.setFlipX(flyDir === 1);
 
-        // Fly Bird
+        // Fly Bird - Slower takeoff
         this.scene.tweens.add({
             targets: this,
             x: targetX,
-            y: targetY,
-            alpha: 0,
-            duration: 5000,
-            ease: "Power1",
+            y: { value: targetY, ease: 'Quad.easeIn' },
+            alpha: { value: 0, duration: flightDuration }, // Match flight duration
+            duration: flightDuration,
+            ease: "Linear",
             onComplete: () => {
-                if (this.shadow) this.shadow.destroy();
-                this.destroy();
+                this.scene.time.delayedCall(Phaser.Math.Between(5000, 10000), () => {
+                    if (this.scene) this.flyBack();
+                });
             }
         });
 
-        // Fade/Shrink Shadow
+        // Fade/Shrink Shadow - Matches horizontal movement perfectly
+        if (this.shadow) {
+            this.scene.tweens.add({
+                targets: this.shadow,
+                x: targetX,
+                scaleX: 0,
+                scaleY: 0,
+                alpha: 0,
+                duration: flightDuration, // Match bird's duration exactly
+                ease: "Linear"
+            });
+        }
+    }
+
+    flyBack() {
+        if (!this.scene) return;
+        
+        this.isLanding = true;
+        this.isFlyingAway = true; 
+
+        // Start even further away horizontally for a very shallow landing angle
+        const startOffset = Phaser.Math.Between(500, 700) * (Math.random() < 0.5 ? -1 : 1);
+        this.x = this.initialX + startOffset;
+        this.y = this.initialY - 450;
+        this.alpha = 0;
+        this.play("bird_flying");
+        
+        // Face the target spot
+        this.setFlipX(this.x < this.initialX);
+
+        // Prepare shadow
+        if (this.shadow) {
+            this.shadow.alpha = 0;
+            this.shadow.scaleX = 0;
+            this.shadow.scaleY = 0;
+            this.shadow.x = this.x; 
+            this.shadow.y = this.groundY;
+        }
+
+        // Use a single duration variable for both bird and shadow to keep them in sync
+        const flightDuration = Phaser.Math.Between(8000, 10000);
+
+        // Fly back to initial spot
         this.scene.tweens.add({
-            targets: this.shadow,
-            x: targetX,
-            scaleX: 0,
-            scaleY: 0,
-            alpha: 0,
-            duration: 3000,
-            ease: "Power1"
+            targets: this,
+            x: this.initialX,
+            y: { value: this.initialY, ease: 'Sine.easeInOut' }, 
+            alpha: { value: 1, duration: flightDuration }, // Fade in over full flight
+            duration: flightDuration,
+            ease: "Linear", 
+            onComplete: () => {
+                if (this.active) {
+                    this.isFlyingAway = false;
+                    this.isLanding = false;
+                    this.startBehaviorLoop();
+                }
+            }
         });
+
+        // Shadow follows the bird's slow X movement
+        if (this.shadow) {
+            this.scene.tweens.add({
+                targets: this.shadow,
+                x: this.initialX,
+                alpha: 0.3,
+                scaleX: 1,
+                scaleY: 1,
+                duration: flightDuration, // Match bird's duration exactly
+                ease: "Linear"
+            });
+        }
     }
 }

@@ -59,6 +59,14 @@ export async function loadPlayer(scene, data, defaultX, defaultY) {
     console.error("Failed to load quiz data:", err);
   }
 
+  // Sync inventory and flags with save data
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  user.inventory = saveData.inventory || [];
+  user.flags = saveData.flags || {};
+  user.goals = saveData.goals || {};
+  user.currentSlot = slotId;
+  localStorage.setItem("user", JSON.stringify(user));
+
   return {
     player,
     slot: slotId,
