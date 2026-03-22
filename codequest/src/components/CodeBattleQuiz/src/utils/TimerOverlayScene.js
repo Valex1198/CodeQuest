@@ -16,7 +16,7 @@ export class TimerOverlayScene extends Phaser.Scene {
     if (this.timerInterval) clearInterval(this.timerInterval);
 
     // Create the DOM timer
-    this.timerDOM = this.add.dom(this.sys.canvas.width / 2, this.sys.canvas.height - 40).createFromHTML(`
+    this.timerDOM = this.add.dom(this.sys.canvas.width / 2 - 40, this.sys.canvas.height - 40).createFromHTML(`
       <div id="timerHUD" style="
         font-family: 'Press Start 2P';
         font-size: 24px;

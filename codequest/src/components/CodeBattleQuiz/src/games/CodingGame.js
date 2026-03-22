@@ -4,6 +4,8 @@
 import Phaser from "phaser";
 import CodingGame from "../assets/CodingGame.png";
 import CodeGameMap from "../assets/CodeGame.json";
+import KeyboardSpriteSheet from "../assets/Keyboard.png";
+import KeyboardJSON from "../assets/Keyboard.json";
 import { codeEditorHTML, getCodeTemplate } from "../utils/codeEditorUtil.js";
 import {
   loadWebFont,
@@ -18,6 +20,7 @@ import { updateCodeTask, getSave } from "../utils/saveManager.js";
 import tasksJSON from "../assets/codingTasks.json";
 import { showTaskCompletionOverlay } from "../utils/completeTaskUtil";
 import { submitCode as runCodeWithPiston } from "../utils/pistonApi.js";
+import { KeyboardManager } from "../utils/KeyboardManager.js";
 export class CodingGameScene extends Phaser.Scene {
   constructor() {
     super({ key: "CodingGameScene" });
@@ -36,6 +39,7 @@ export class CodingGameScene extends Phaser.Scene {
   preload() {
     this.load.image("codingArena", CodingGame);
     this.load.tilemapTiledJSON("codeGame", CodeGameMap);
+    this.load.atlas("keyboard", KeyboardSpriteSheet, KeyboardJSON);
   }
 
   async create(data) {
@@ -64,6 +68,11 @@ export class CodingGameScene extends Phaser.Scene {
       .image(480, 270, "codingArena")
       .setOrigin(0.5)
       .setDepth(1);
+
+    // --------------------------------------------------
+    // KEYBOARD (Dynamic & Reactive)
+    // --------------------------------------------------
+    this.keyboard = new KeyboardManager(this, 740, 457, KeyboardSpriteSheet);
 
     // --------------------------------------------------
     // MAP & UI OBJECTS
@@ -320,5 +329,9 @@ const runCode = async (taskLevel = startingTaskLevel) => {
 
     viewLabel.setDepth(10);
     hitbox.setDepth(11);
+  }
+
+  update() {
+    // Scene update logic
   }
 }
