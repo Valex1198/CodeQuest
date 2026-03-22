@@ -77,8 +77,8 @@
                  "type":"",
                  "visible":true,
                  "width":296,
-                 "x":599.166666666667,
-                 "y":163.666666666667
+                 "x":600.5,
+                 "y":125
                 }, 
                 {
                  "height":23.125,
@@ -107,9 +107,20 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":4,
+         "name":"Keyboard",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":4,
- "nextobjectid":7,
+ "nextlayerid":5,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

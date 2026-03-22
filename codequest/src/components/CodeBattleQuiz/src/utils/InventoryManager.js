@@ -3,20 +3,10 @@
  * Handles the logic for a 9-slot inventory system.
  */
 
-import { getSave, setSave } from "./saveManager";
+import { persistCurrentState } from "./saveManager";
 import { completeGoal } from "./GoalManager";
 
 const MAX_SLOTS = 9;
-
-/**
- * Get the current save slot from the active scene or data
- */
-const getCurrentSlot = () => {
-    // This is a bit of a hack since InventoryManager doesn't have scene context
-    // We try to find it in the current scene if possible, or fallback to 1
-    const storedUser = JSON.parse(localStorage.getItem("user")) || {};
-    return storedUser.currentSlot || 1; 
-};
 
 export const getInventory = () => {
     const user = JSON.parse(localStorage.getItem("user")) || {};
@@ -29,30 +19,17 @@ export const saveInventory = (inventory) => {
     localStorage.setItem("user", JSON.stringify(user));
 };
 
-export const addItemToSave = async (userId, slotId, item) => {
-    const saveData = await getSave(userId, slotId);
-    if (!saveData) return;
-    
-    if (!saveData.inventory) saveData.inventory = [];
-    if (saveData.inventory.length < MAX_SLOTS) {
-        saveData.inventory.push(item);
-        // Pass the updated inventory as the last parameter (or correct positional param)
-        // setSave(userId, slotId, scene, player, language, quiz, codingTasks, isNewGame, taxi, inventory)
-        await setSave(userId, slotId, null, null, saveData.language, null, null, false, null, saveData.inventory);
-    }
-};
-
 export const addItem = async (item) => {
     const inventory = getInventory();
     if (inventory.length < MAX_SLOTS) {
         inventory.push(item);
         saveInventory(inventory);
         
-        // Also sync to persistent save if we can identify user/slot
-        const user = JSON.parse(localStorage.getItem("user")) || {};
-        const slotId = user.currentSlot || 1;
-        if (user.id) {
-            await addItemToSave(user.id, slotId, item);
+        // Sync to persistent save
+        try {
+            await persistCurrentState();
+        } catch (err) {
+            console.error("Failed to sync inventory (add):", err);
         }
 
         // --- GOAL TRACKING ---
@@ -67,11 +44,18 @@ export const addItem = async (item) => {
     return false;
 };
 
-export const removeItem = (index) => {
+export const removeItem = async (index) => {
     const inventory = getInventory();
     if (index >= 0 && index < inventory.length) {
         inventory.splice(index, 1);
         saveInventory(inventory);
+        
+        // Sync to persistent save
+        try {
+            await persistCurrentState();
+        } catch (err) {
+            console.error("Failed to sync inventory (remove):", err);
+        }
         return true;
     }
     return false;

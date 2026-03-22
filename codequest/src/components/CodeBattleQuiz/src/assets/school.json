@@ -87,12 +87,12 @@
                         {
                          "name":"spawnX",
                          "type":"int",
-                         "value":480
+                         "value":775
                         }, 
                         {
                          "name":"spawnY",
                          "type":"int",
-                         "value":450
+                         "value":515
                         }, 
                         {
                          "name":"targetScene",
@@ -375,9 +375,32 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":7,
+         "name":"Student3",
+         "objects":[
+                {
+                 "height":0,
+                 "id":36,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":152,
+                 "y":73
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":36,
+ "nextlayerid":8,
+ "nextobjectid":37,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

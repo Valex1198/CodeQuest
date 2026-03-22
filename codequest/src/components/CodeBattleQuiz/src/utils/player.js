@@ -45,7 +45,9 @@ export function createPlayer(scene, x, y, texture = "playerIdle") {
   }
 
   // Keyboard controls
-  const keys = scene.input.keyboard.addKeys({ W: "W", A: "A", S: "S", D: "D", ENTER: "ENTER" });
+  // The second argument `false` disables `event.preventDefault()`, which allows
+  // typing into DOM elements like the code editor.
+  const keys = scene.input.keyboard.addKeys('W,A,S,D,ENTER', false);
   player.keys = keys;
 
   // Camera follow
