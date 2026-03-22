@@ -226,7 +226,7 @@ export class LivingRoomScene extends Phaser.Scene {
     await launchHUD(this, this.player, this.currentSlot, this.language);
     this.songUI = createSongUI(this, "Living Room");
 
-    this.input.keyboard.on("keydown-L", async () => {
+    this.input.keyboard.on("keydown-ESC", async () => {
       this.scene.start("SaveSlotsScene", { player: this.player, loadSlot: this.currentSlot });
     });
   }

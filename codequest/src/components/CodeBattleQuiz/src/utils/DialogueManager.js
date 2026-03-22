@@ -10,6 +10,8 @@ export const checkCondition = (condition, gameState) => {
   const { type, key, value, id, status, item } = condition;
 
   switch (type) {
+    case 'LANGUAGE_IS':
+      return gameState.language === value;
     case 'FLAG_EQUALS':
       return gameState.flags?.[key] === value;
     case 'QUEST_STATUS':

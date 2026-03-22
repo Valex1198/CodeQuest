@@ -87,36 +87,65 @@ export const createIOBox = (scene, obj, zIndex = 2) => {
     scene,
     obj,
     `
-    <div style="display:flex; flex-direction:column; gap:6px;">
-      <div id="inputText" contenteditable="true" style="
-        width:${obj.width}px;
-        height:${obj.height / 2 - 5}px;
-        background:#111;
-        color:#0f0;
-        font-family:monospace;
-        padding:10px;
-        overflow:auto;
-        border:1px solid #333;
-      "></div>
+    <div style="
+      display:flex; 
+      flex-direction:column; 
+      width:${obj.width}px; 
+      height:${obj.height}px; 
+      background:#000; 
+      border:1px solid #333; 
+      font-family: monospace;
+      box-sizing: border-box;
+    ">
+      <!-- Terminal Output Area -->
       <pre id="outputText" style="
-        width:${obj.width}px;
-        height:${obj.height / 2 - 5}px;
-        background:#000;
-        color:#0f0;
-        font-family:monospace;
-        padding:10px;
-        overflow:auto;
-        border:1px solid #333;
-      "></pre>
+        flex: 1;
+        margin: 0;
+        padding: 10px;
+        color: #0f0;
+        font-size: 12px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      ">Welcome to CodeQuest Terminal...
+Ready for input.</pre>
+
+      <!-- Terminal Input Line -->
+      <div style="
+        display: flex;
+        align-items: center;
+        background: #111;
+        border-top: 1px solid #333;
+        padding: 4px 10px;
+        color: #0f0;
+        font-size: 12px;
+      ">
+        <span style="margin-right: 8px; color: #888; user-select: none;">&gt;</span>
+        <div id="inputText" contenteditable="true" style="
+          flex: 1;
+          background: transparent;
+          color: #0f0;
+          border: none;
+          outline: none;
+          min-height: 20px;
+          line-height: 20px;
+        " placeholder="Enter input here..."></div>
+      </div>
     </div>
   `,
     zIndex
   );
 
+  const inputField = ioArea.getChildByID("inputText");
+  const outputField = ioArea.getChildByID("outputText");
+
+  // Visual feedback: click anywhere in the box to focus input
+  ioArea.node.addEventListener("click", () => inputField.focus());
+
   return {
     ioArea,
-    inputField: ioArea.getChildByID("inputText"),
-    outputField: ioArea.getChildByID("outputText"),
+    inputField,
+    outputField,
   };
 };
 
@@ -164,6 +193,12 @@ export const createTaskButton = (
     disablePhaserDOM(codeEditorDiv, true);
     disableDOMElements([ioArea.inputField, ioArea.outputField], true);
 
+    // Make the timer transparent
+    const timerScene = scene.scene.get('TimerOverlayScene');
+    if (timerScene && timerScene.timerDOM) {
+      timerScene.timerDOM.alpha = 0.1;
+    }
+
     scene.scene.pause(scene.scene.key);
 
     scene.scene.launch(overlaySceneName, {
@@ -174,6 +209,11 @@ export const createTaskButton = (
     const overlayScene = scene.scene.get(overlaySceneName);
 
     overlayScene.events.once("shutdown", () => {
+      // Restore timer opacity
+      if (timerScene && timerScene.timerDOM) {
+        timerScene.timerDOM.alpha = 1;
+      }
+      
       disablePhaserDOM(codeEditorDiv, false);
       disableDOMElements([ioArea.inputField, ioArea.outputField], false);
       scene.scene.resume(scene.scene.key);

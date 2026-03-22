@@ -52,6 +52,25 @@ export default class TaskOverlay extends Phaser.Scene {
     // Task DOM box
     if (data.task) {
       const task = data.task;
+      
+      // Generate Test Case HTML
+      let testCaseHtml = "";
+      if (task.testCases) {
+        task.testCases.forEach((tc, index) => {
+          if (!tc.hidden) {
+            testCaseHtml += `
+              <div style="font-size:10px; color:#00ff00; margin-top:8px;">Test Case ${index + 1}:</div>
+              <div style="font-size:9px; color:#aaa; margin-left:8px;">Input: ${tc.input || "none"}</div>
+              <div style="font-size:9px; color:#00ffff; margin-left:8px;">Expected: ${tc.output}</div>
+            `;
+          }
+        });
+      } else {
+        // Fallback for old format
+        if (task.sampleInput) testCaseHtml += `<div style="font-size:11px; color:#00ff00; margin-bottom:12px;">Sample Input:<br>${task.sampleInput}</div>`;
+        if (task.sampleOutput) testCaseHtml += `<div style="font-size:11px; color:#00ffff; margin-bottom:12px;">Expected Output:<br>${task.sampleOutput}</div>`;
+      }
+
       const html = `
         <div id="taskBox" style="
           width: ${panelWidth - 32}px;
@@ -67,9 +86,8 @@ export default class TaskOverlay extends Phaser.Scene {
             ${task.title}
           </div>
           <div style="font-size:12px; margin-bottom:12px;">${task.description}</div>
-          ${task.sampleInput ? `<div style="font-size:11px; color:#00ff00; margin-bottom:12px;">Sample Input:<br>${task.sampleInput}</div>` : ""}
-          ${task.sampleOutput ? `<div style="font-size:11px; color:#00ffff; margin-bottom:12px;">Expected Output:<br>${task.sampleOutput}</div>` : ""}
-          ${task.hint ? `<div style="font-size:10px; color:#ff8800; margin-bottom:12px;">Hint: ${task.hint}</div>` : ""}
+          ${testCaseHtml}
+          ${task.hint ? `<div style="font-size:10px; color:#ff8800; margin-top:16px; margin-bottom:12px;">Hint: ${task.hint}</div>` : ""}
         </div>
       `;
 

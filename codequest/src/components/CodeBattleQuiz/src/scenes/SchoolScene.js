@@ -10,6 +10,8 @@ import BirdJson from "../assets/BirdSprite.json";
 import GuardPng from "../assets/Guard.png";
 import GuardJson from "../assets/Guard.json";
 import GuardDialogue from "../../../../assets/dialogue/guard.json";
+import Student3Png from "../assets/Student3.png";
+import Student3Dialogue from "../../../../assets/dialogue/student3.json";
 import { getNPCDialogue } from "../utils/DialogueManager";
 import { Bird } from "../utils/Bird";
 import { preloadPlayer, updatePlayer } from "../utils/player";
@@ -22,6 +24,7 @@ import { launchHUD } from "../utils/hudUtil.js";
 import { createMenuButton } from "../utils/uiHelpers.js";
 import { hasItem, removeItem, getInventory } from "../utils/InventoryManager.js";
 import { completeGoal } from "../utils/GoalManager";
+import { initNPCMovement, updateNPCMovement } from "../utils/NPCMovementManager";
 
 export class SchoolScene extends Phaser.Scene {
   constructor() {
@@ -61,6 +64,7 @@ export class SchoolScene extends Phaser.Scene {
     this.load.atlas("idleTaxi", TaxiIdlePng, TaxiIdleJson);
     this.load.atlas("drivingTaxi", TaxiDrivingPng, TaxiDrivingJson);
     this.load.atlas("guard", GuardPng, GuardJson);
+    this.load.spritesheet("student3", Student3Png, { frameWidth: 32, frameHeight: 48 });
     Bird.preload(this, BirdPng, BirdJson);
     preloadPlayer(this);
     preloadSongUI(this);
@@ -135,6 +139,30 @@ export class SchoolScene extends Phaser.Scene {
       });
     }
 
+    // Student3 Animations (Only Left/Right needed, but creating all for consistency)
+    const directions = ["right", "up", "left", "down"];
+    const startFrames = [0, 6, 12, 18];
+    directions.forEach((dir, i) => {
+        const walkKey = `student3_walk_${dir}`;
+        const idleKey = `student3_idle_${dir}`;
+        if (!this.anims.exists(walkKey)) {
+            this.anims.create({
+                key: walkKey,
+                frames: this.anims.generateFrameNumbers("student3", { start: startFrames[i], end: startFrames[i] + 5 }),
+                frameRate: 6,
+                repeat: -1
+            });
+        }
+        if (!this.anims.exists(idleKey)) {
+            this.anims.create({
+                key: idleKey,
+                frames: this.anims.generateFrameNumbers("student3", { start: startFrames[i], end: startFrames[i] }),
+                frameRate: 1,
+                repeat: -1
+            });
+        }
+    });
+
     // Default player position
     const defaultX = data?.x ?? 238;
     const defaultY = data?.y ?? 270;
@@ -151,6 +179,9 @@ export class SchoolScene extends Phaser.Scene {
 
     this.physics.add.collider(this.player, this.collisionZones);
 
+    // NPC list for interaction
+    this.npcList = [];
+
     // Guard NPC from Tiled
     const guardLayer = map.getObjectLayer("Guard")?.objects || [];
     const guardObj = guardLayer.find(obj => obj.name === "") || guardLayer[0];
@@ -165,10 +196,36 @@ export class SchoolScene extends Phaser.Scene {
     this.guard.play("guard_idle");
     this.guard.setImmovable(true);
     if (this.guard.body.setAllowGravity) this.guard.body.setAllowGravity(false);
+    this.guard.setSize(20, 24).setOffset(6, 24);
+    this.guard.isGuard = true;
+    this.npcList.push(this.guard);
     this.physics.add.collider(this.player, this.guard);
 
-    // Guard Interaction Prompt
-    this.interactText = this.add.text(guardX, guardY - 40, "Press E to talk", {
+    // Student3 from Tiled
+    const student3Layer = map.getObjectLayer("Student3");
+    const student3Obj = student3Layer?.objects[0];
+    if (student3Obj) {
+        this.student3 = this.physics.add.sprite(student3Obj.x, student3Obj.y, "student3");
+        this.student3.setDepth(5);
+        this.student3.play("student3_idle_down");
+        this.student3.setImmovable(true);
+        if (this.student3.body.setAllowGravity) this.student3.body.setAllowGravity(false);
+        this.student3.setSize(20, 24).setOffset(6, 24);
+        this.student3.dialogueData = Student3Dialogue;
+        this.npcList.push(this.student3);
+        this.physics.add.collider(this.player, this.student3);
+        this.physics.add.collider(this.student3, this.collisionZones);
+
+        // Left-Right Movement
+        const s3Path = [
+            { dir: "left", dist: 80, wait: 2000 },
+            { dir: "right", dist: 80, wait: 2000 }
+        ];
+        initNPCMovement(this.student3, s3Path, "student3_");
+    }
+
+    // Interaction Prompt
+    this.interactText = this.add.text(0, 0, "Press E to talk", {
       fontSize: "14px",
       fill: "#ffffff",
       backgroundColor: "rgba(0,0,0,0.6)",
@@ -176,7 +233,7 @@ export class SchoolScene extends Phaser.Scene {
     }).setOrigin(0.5).setVisible(false);
 
     // Dialogue Bubble
-    this.dialogueBubble = this.add.container(guardX, guardY - 70).setVisible(false).setDepth(15);
+    this.dialogueBubble = this.add.container(0, 0).setVisible(false).setDepth(15);
     this.bubbleBg = this.add.graphics();
     this.drawBubble(0);
     this.dialogueText = this.add.text(0, -30, "", {
@@ -186,6 +243,7 @@ export class SchoolScene extends Phaser.Scene {
       align: "center"
     }).setOrigin(0.5);
     this.dialogueBubble.add([this.bubbleBg, this.dialogueText]);
+    this.activeNPC = null;
 
     // Portals initialization
     setupPortals(this, map, this.player);
@@ -210,48 +268,60 @@ export class SchoolScene extends Phaser.Scene {
 
     // Handle Interaction
     this.input.keyboard.on("keydown-E", () => {
-      if (this.isGuardChecking || !this.guard) return;
+      if (this.isGuardChecking) return;
       
-      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.guard.x, this.guard.y);
-      if (dist < 60) {
-        if (this.dialogueBubble.visible) {
+      let nearestNPC = null;
+      let minDist = 60;
+
+      this.npcList.forEach(npc => {
+          const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.x, npc.y);
+          if (dist < minDist) {
+              nearestNPC = npc;
+              minDist = dist;
+          }
+      });
+
+      if (nearestNPC) {
+        if (this.dialogueBubble.visible && this.activeNPC === nearestNPC) {
           this.dialogueBubble.setVisible(false);
+          this.activeNPC = null;
           if (this.dialogueTimer) this.dialogueTimer.remove();
         } else {
-          // If guard is approved/gone, show rest flavour text
-          if (this.guardApproved) {
-            this.dialogueText.setText("Mmm... this coffee is exactly what I needed. Enjoy the hallway!");
-            this.dialogueBubble.setVisible(true);
-            
-            if (this.dialogueTimer) this.dialogueTimer.remove();
-            this.dialogueTimer = this.time.delayedCall(5000, () => {
-              this.dialogueBubble.setVisible(false);
-            });
-            return;
-          }
-
-          // Otherwise check for ID
-          const hasId = hasItem("School ID");
-          if (hasId) {
-            this.startGuardCheckSequence();
+          this.activeNPC = nearestNPC;
+          
+          if (nearestNPC.isGuard) {
+            // Guard Logic
+            if (this.guardApproved) {
+                this.dialogueText.setText("Mmm... this coffee is exactly what I needed. Enjoy the hallway!");
+                this.dialogueBubble.setVisible(true);
+                if (this.dialogueTimer) this.dialogueTimer.remove();
+                this.dialogueTimer = this.time.delayedCall(5000, () => { if (this.activeNPC === this.guard) this.dialogueBubble.setVisible(false); });
+            } else {
+                const hasId = hasItem("School ID");
+                if (hasId) {
+                    this.startGuardCheckSequence();
+                } else {
+                    const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+                    const gameState = { flags: storedUser.flags || {}, user: storedUser };
+                    const dialogue = getNPCDialogue(GuardDialogue, gameState);
+                    if (dialogue) {
+                        this.dialogueText.setText(dialogue.text);
+                        this.dialogueBubble.setVisible(true);
+                        if (this.dialogueTimer) this.dialogueTimer.remove();
+                        this.dialogueTimer = this.time.delayedCall(5000, () => { if (this.activeNPC === this.guard) this.dialogueBubble.setVisible(false); });
+                    }
+                }
+            }
           } else {
+            // Generic NPC logic (Student3)
             const storedUser = JSON.parse(localStorage.getItem("user")) || {};
-            const gameState = {
-              flags: storedUser.flags || {},
-              quests: storedUser.quests || {},
-              inventory: storedUser.inventory || [],
-              user: storedUser
-            };
-
-            const dialogue = getNPCDialogue(GuardDialogue, gameState);
+            const gameState = { flags: storedUser.flags || {}, inventory: storedUser.inventory || [], user: storedUser };
+            const dialogue = getNPCDialogue(nearestNPC.dialogueData, gameState);
             if (dialogue) {
-              this.dialogueText.setText(dialogue.text);
-              this.dialogueBubble.setVisible(true);
-
-              if (this.dialogueTimer) this.dialogueTimer.remove();
-              this.dialogueTimer = this.time.delayedCall(5000, () => {
-                this.dialogueBubble.setVisible(false);
-              });
+                this.dialogueText.setText(dialogue.text);
+                this.dialogueBubble.setVisible(true);
+                if (this.dialogueTimer) this.dialogueTimer.remove();
+                this.dialogueTimer = this.time.delayedCall(5000, () => { if (this.activeNPC === nearestNPC) this.dialogueBubble.setVisible(false); });
             }
           }
         }
@@ -439,24 +509,39 @@ export class SchoolScene extends Phaser.Scene {
 
     // Sync UI position listener
     this.events.on("postupdate", () => {
-        if (this.guard && this.guard.active) {
-            if (this.interactText) this.interactText.setPosition(this.guard.x, this.guard.y - 40);
-            if (this.dialogueBubble && this.dialogueBubble.visible) {
-                const targetX = this.guard.x;
-                const targetY = this.guard.y - 70;
-                const cam = this.cameras.main;
-                const view = cam.worldView;
+        if (!this.npcList || !this.player) return;
+
+        let nearestNPC = null;
+        let minDist = 60;
+
+        this.npcList.forEach(npc => {
+            if (!npc || !npc.active) return;
+            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.x, npc.y);
+            if (dist < minDist) {
+                nearestNPC = npc;
+                minDist = dist;
+            }
+        });
+
+        if (nearestNPC && this.interactText) {
+            this.interactText.setPosition(nearestNPC.x, nearestNPC.y - 40);
+            this.interactText.setVisible(!this.dialogueBubble.visible && !this.isGuardChecking);
+        } else if (this.interactText) {
+            this.interactText.setVisible(false);
+        }
+
+        if (this.dialogueBubble && this.dialogueBubble.visible && this.activeNPC) {
+            const targetX = this.activeNPC.x;
+            const targetY = this.activeNPC.y - 70;
+            const cam = this.cameras.main;
+            const view = cam.worldView;
+            if (view) {
                 const clampedX = Phaser.Math.Clamp(targetX, view.x + 105, view.x + view.width - 105);
                 const clampedY = Phaser.Math.Clamp(targetY, view.y + 65, view.y + view.height - 10);
                 this.dialogueBubble.x = Math.round(Phaser.Math.Linear(this.dialogueBubble.x, clampedX, 0.2));
                 this.dialogueBubble.y = Math.round(Phaser.Math.Linear(this.dialogueBubble.y, clampedY, 0.2));
                 this.drawBubble(targetX - this.dialogueBubble.x);
-            } else if (this.dialogueBubble) {
-                this.dialogueBubble.setPosition(this.guard.x, this.guard.y - 70);
-                this.drawBubble(0);
             }
-            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.guard.x, this.guard.y);
-            this.interactText.setVisible(dist < 60 && !this.dialogueBubble.visible && !this.isGuardChecking);
         }
     });
   }
@@ -477,14 +562,14 @@ export class SchoolScene extends Phaser.Scene {
           schoolIDScene.showID(0.5, false);
       }
 
-      this.time.delayedCall(2000, () => {
+      this.time.delayedCall(2000, async () => {
         this.dialogueText.setText("Hand it over. I need to verify your credentials.");
         
         // Transaction simulation: Remove ID from inventory
         const inv = getInventory();
         const idIndex = inv.findIndex(item => item.name === "School ID" || item === "School ID");
         if (idIndex !== -1) {
-          removeItem(idIndex);
+          await removeItem(idIndex);
           console.log("School ID removed for checking.");
         }
 
@@ -523,19 +608,19 @@ export class SchoolScene extends Phaser.Scene {
                         targets: this.guard,
                         alpha: 1,
                         duration: 1000,
-                        onComplete: () => {
+                        onComplete: async () => {
                           if (this.hallwayPortal && this.hallwayPortal.body) {
                             this.hallwayPortal.body.enable = true;
                             console.log("Hallway portal enabled!");
                           }
 
-                          // Update flags in current session only (let the player choose when to save)
+                          // Update flags and persist immediately to prevent state loss on scene transition
                           const storedUser = JSON.parse(localStorage.getItem("user")) || {};
                           if (!storedUser.flags) storedUser.flags = {};
                           storedUser.flags.guard_gone = true;
                           localStorage.setItem("user", JSON.stringify(storedUser));
                           
-                          completeGoal("pass_guard", this);
+                          await completeGoal("pass_guard", this);
 
                           this.isGuardChecking = false;
                           
@@ -608,6 +693,11 @@ export class SchoolScene extends Phaser.Scene {
         this.birds.getChildren().forEach(bird => {
             bird.update(this.player, this.taxi);
         });
+    }
+
+    // Update Student3
+    if (this.student3 && this.student3.body) {
+        updateNPCMovement(this.student3, 80, this);
     }
   }
 }

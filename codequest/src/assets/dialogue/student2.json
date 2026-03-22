@@ -1,0 +1,24 @@
+{
+  "npcId": "student2",
+  "name": "Ben",
+  "dialogueNodes": [
+    {
+      "id": "node1",
+      "text": "I'm so nervous about the quiz today. Have you been studying?",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "node2",
+      "text": "The computer labs are huge! I almost got lost earlier.",
+      "conditions": [],
+      "actions": []
+    },
+    {
+      "id": "node3",
+      "text": "I hope the Python bootcamp isn't too hard for beginners.",
+      "conditions": [],
+      "actions": []
+    }
+  ]
+}

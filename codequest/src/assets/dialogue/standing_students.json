@@ -1,0 +1,134 @@
+{
+  "StandingStudent1": {
+    "name": "Standing Student 1",
+    "dialogueNodes": [
+      {
+        "id": "python_question",
+        "text": "Hey, you're in the Python program, right? Do you have the basics of printing down?",
+        "conditions": [
+          { "type": "LANGUAGE_IS", "value": "Python" },
+          { "type": "FLAG_EQUALS", "key": "has_python_guide", "value": false }
+        ],
+        "options": [
+          { "text": "Yep, I'm all set!", "nextNode": "response_yes" },
+          { "text": "I could use a refresher.", "nextNode": "python_give_guide" }
+        ],
+        "priority": 20
+      },
+      {
+        "id": "python_give_guide",
+        "text": "No worries! It's the first thing everyone learns. Here, take this guide. It shows you how to use print().",
+        "actions": [
+          { "type": "SET_FLAG", "key": "has_python_guide", "value": true },
+          { "type": "GIVE_ITEM", "item": { "name": "Python Print Guide", "icon": "BookIcon", "description": "A simple guide to Python's print() function." } }
+        ],
+        "priority": 20
+      },
+      {
+        "id": "python_followup",
+        "text": "Hope that Python guide was helpful! `print()` is super useful.",
+        "conditions": [
+          { "type": "LANGUAGE_IS", "value": "Python" },
+          { "type": "FLAG_EQUALS", "key": "has_python_guide", "value": true }
+        ],
+        "priority": 21
+      },
+      {
+        "id": "java_question",
+        "text": "Hey there. You're in the Java program, right? Do you have the basics of printing to the console?",
+        "conditions": [
+          { "type": "LANGUAGE_IS", "value": "Java" },
+          { "type": "FLAG_EQUALS", "key": "has_java_guide", "value": false }
+        ],
+        "options": [
+            { "text": "Yep, I'm ready.", "nextNode": "response_yes" },
+            { "text": "I'm not too sure.", "nextNode": "java_give_guide" }
+        ],
+        "priority": 20
+      },
+      {
+        "id": "java_give_guide",
+        "text": "The first step is always printing to the console. Here, this might help.",
+        "actions": [
+          { "type": "SET_FLAG", "key": "has_java_guide", "value": true },
+          { "type": "GIVE_ITEM", "item": { "name": "Java Print Guide", "icon": "BookIcon", "description": "A simple guide to Java's System.out.println()." } }
+        ],
+        "priority": 20
+      },
+      {
+        "id": "java_followup",
+        "text": "That `System.out.println()` is a mouthful, but it gets the job done for Java!",
+        "conditions": [
+          { "type": "LANGUAGE_IS", "value": "Java" },
+          { "type": "FLAG_EQUALS", "key": "has_java_guide", "value": true }
+        ],
+        "priority": 21
+      },
+      {
+        "id": "cpp_question",
+        "text": "Welcome! You're studying C++, yeah? Do you know how to use `cout` for printing?",
+        "conditions": [
+          { "type": "LANGUAGE_IS", "value": "C++" },
+          { "type": "FLAG_EQUALS", "key": "has_cpp_guide", "value": false }
+        ],
+        "options": [
+            { "text": "Yeah, I know the basics.", "nextNode": "response_yes" },
+            { "text": "Not really, no.", "nextNode": "cpp_give_guide" }
+        ],
+        "priority": 20
+      },
+      {
+        "id": "cpp_give_guide",
+        "text": "C++ can be tricky. It all starts with `cout`. Let me give you this quick reference.",
+        "actions": [
+          { "type": "SET_FLAG", "key": "has_cpp_guide", "value": true },
+          { "type": "GIVE_ITEM", "item": { "name": "C++ Print Guide", "icon": "BookIcon", "description": "A simple guide to C++'s std::cout." } }
+        ],
+        "priority": 20
+      },
+      {
+        "id": "cpp_followup",
+        "text": "Remember to include `<iostream>` if you want to use `std::cout` in C++!",
+        "conditions": [
+          { "type": "LANGUAGE_IS", "value": "C++" },
+          { "type": "FLAG_EQUALS", "key": "has_cpp_guide", "value": true }
+        ],
+        "priority": 21
+      },
+      {
+        "id": "response_yes",
+        "text": "Awesome! Good luck out there, the challenges get tough.",
+        "priority": 1
+      },
+      {
+        "id": "node1",
+        "text": "The school guard finally took his break. I've been waiting to get into the hallway for hours!",
+        "conditions": [{ "type": "FLAG_EQUALS", "key": "guard_gone", "value": true }],
+        "priority": 10
+      },
+      {
+        "id": "node2",
+        "text": "That guard is so strict... I hope he gets some coffee and chills out.",
+        "conditions": [],
+        "priority": 0
+      }
+    ]
+  },
+  "StandingStudent2": {
+    "name": "Standing Student 2",
+    "dialogueNodes": [
+      {
+        "id": "node1",
+        "text": "I heard the computer labs are amazing! I can't wait to start the Python bootcamp.",
+        "conditions": [],
+        "priority": 0
+      },
+      {
+        "id": "node2",
+        "text": "Have you seen the birds around here? They seem to follow the taxi everywhere.",
+        "conditions": [],
+        "priority": 1
+      }
+    ]
+  }
+}
