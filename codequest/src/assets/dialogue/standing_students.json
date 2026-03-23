@@ -4,29 +4,33 @@
     "dialogueNodes": [
       {
         "id": "python_question",
-        "text": "Hey, you're in the Python program, right? Do you have the basics of printing down?",
+        "text": "Hey, you're in the Python program, right? Are you new to Python and its syntax? I've got something that might help.",
         "conditions": [
           { "type": "LANGUAGE_IS", "value": "Python" },
           { "type": "FLAG_EQUALS", "key": "has_python_guide", "value": false }
         ],
         "options": [
-          { "text": "Yep, I'm all set!", "nextNode": "response_yes" },
-          { "text": "I could use a refresher.", "nextNode": "python_give_guide" }
+          { "text": "Yes, I'm new!", "nextNode": "python_give_guide" },
+          { "text": "No, I've got this.", "nextNode": "response_no" }
         ],
         "priority": 20
       },
       {
         "id": "python_give_guide",
-        "text": "No worries! It's the first thing everyone learns. Here, take this guide. It shows you how to use print().",
+        "text": "No worries! Every master starts as a beginner. Here, take this Python Print Guide. It'll show you the ropes of using the print() function.",
+        "conditions": [
+            { "type": "LANGUAGE_IS", "value": "Python" },
+            { "type": "FLAG_EQUALS", "key": "has_python_guide", "value": false }
+        ],
         "actions": [
           { "type": "SET_FLAG", "key": "has_python_guide", "value": true },
           { "type": "GIVE_ITEM", "item": { "name": "Python Print Guide", "icon": "BookIcon", "description": "A simple guide to Python's print() function." } }
         ],
-        "priority": 20
+        "priority": 10
       },
       {
         "id": "python_followup",
-        "text": "Hope that Python guide was helpful! `print()` is super useful.",
+        "text": "Hope that Python guide was helpful! `print()` is the first step to becoming a Pythonista.",
         "conditions": [
           { "type": "LANGUAGE_IS", "value": "Python" },
           { "type": "FLAG_EQUALS", "key": "has_python_guide", "value": true }
@@ -35,29 +39,33 @@
       },
       {
         "id": "java_question",
-        "text": "Hey there. You're in the Java program, right? Do you have the basics of printing to the console?",
+        "text": "Hey there. You're in the Java program, right? Are you new to Java and its syntax? I've got something that might help.",
         "conditions": [
           { "type": "LANGUAGE_IS", "value": "Java" },
           { "type": "FLAG_EQUALS", "key": "has_java_guide", "value": false }
         ],
         "options": [
-            { "text": "Yep, I'm ready.", "nextNode": "response_yes" },
-            { "text": "I'm not too sure.", "nextNode": "java_give_guide" }
+            { "text": "Yes, I'm new!", "nextNode": "java_give_guide" },
+            { "text": "No, I've got this.", "nextNode": "response_no" }
         ],
         "priority": 20
       },
       {
         "id": "java_give_guide",
-        "text": "The first step is always printing to the console. Here, this might help.",
+        "text": "Java can be a bit overwhelming at first. Here, take this Java Print Guide. It'll help you understand how to output data.",
+        "conditions": [
+            { "type": "LANGUAGE_IS", "value": "Java" },
+            { "type": "FLAG_EQUALS", "key": "has_java_guide", "value": false }
+        ],
         "actions": [
           { "type": "SET_FLAG", "key": "has_java_guide", "value": true },
           { "type": "GIVE_ITEM", "item": { "name": "Java Print Guide", "icon": "BookIcon", "description": "A simple guide to Java's System.out.println()." } }
         ],
-        "priority": 20
+        "priority": 10
       },
       {
         "id": "java_followup",
-        "text": "That `System.out.println()` is a mouthful, but it gets the job done for Java!",
+        "text": "That `System.out.println()` is a mouthful, but it's essential for any Java developer!",
         "conditions": [
           { "type": "LANGUAGE_IS", "value": "Java" },
           { "type": "FLAG_EQUALS", "key": "has_java_guide", "value": true }
@@ -66,29 +74,33 @@
       },
       {
         "id": "cpp_question",
-        "text": "Welcome! You're studying C++, yeah? Do you know how to use `cout` for printing?",
+        "text": "Welcome! You're studying C++, yeah? Are you new to C++ and its syntax? I've got something that might help.",
         "conditions": [
           { "type": "LANGUAGE_IS", "value": "C++" },
           { "type": "FLAG_EQUALS", "key": "has_cpp_guide", "value": false }
         ],
         "options": [
-            { "text": "Yeah, I know the basics.", "nextNode": "response_yes" },
-            { "text": "Not really, no.", "nextNode": "cpp_give_guide" }
+            { "text": "Yes, I'm new!", "nextNode": "cpp_give_guide" },
+            { "text": "No, I've got this.", "nextNode": "response_no" }
         ],
         "priority": 20
       },
       {
         "id": "cpp_give_guide",
-        "text": "C++ can be tricky. It all starts with `cout`. Let me give you this quick reference.",
+        "text": "C++ can be tricky with all its namespaces. Here, take this C++ Print Guide. It'll show you how to use `std::cout` correctly.",
+        "conditions": [
+            { "type": "LANGUAGE_IS", "value": "C++" },
+            { "type": "FLAG_EQUALS", "key": "has_cpp_guide", "value": false }
+        ],
         "actions": [
           { "type": "SET_FLAG", "key": "has_cpp_guide", "value": true },
           { "type": "GIVE_ITEM", "item": { "name": "C++ Print Guide", "icon": "BookIcon", "description": "A simple guide to C++'s std::cout." } }
         ],
-        "priority": 20
+        "priority": 10
       },
       {
         "id": "cpp_followup",
-        "text": "Remember to include `<iostream>` if you want to use `std::cout` in C++!",
+        "text": "Remember to include `<iostream>` if you want to use `std::cout` in C++! Good luck!",
         "conditions": [
           { "type": "LANGUAGE_IS", "value": "C++" },
           { "type": "FLAG_EQUALS", "key": "has_cpp_guide", "value": true }
@@ -96,8 +108,8 @@
         "priority": 21
       },
       {
-        "id": "response_yes",
-        "text": "Awesome! Good luck out there, the challenges get tough.",
+        "id": "response_no",
+        "text": "Awesome! Glad to hear you're already familiar. Good luck with your studies!",
         "priority": 1
       },
       {

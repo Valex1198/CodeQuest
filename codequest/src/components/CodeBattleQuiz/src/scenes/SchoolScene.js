@@ -22,7 +22,7 @@ import { preloadSongUI, createSongUI } from "../utils/songUI";
 import { loadPlayer } from "../utils/playerLoader";
 import { launchHUD } from "../utils/hudUtil.js";
 import { createMenuButton } from "../utils/uiHelpers.js";
-import { hasItem, removeItem, getInventory } from "../utils/InventoryManager.js";
+import { addItem, hasItem, removeItem, getInventory } from "../utils/InventoryManager.js";
 import { completeGoal } from "../utils/GoalManager";
 import { initNPCMovement, updateNPCMovement } from "../utils/NPCMovementManager";
 
@@ -33,7 +33,41 @@ export class SchoolScene extends Phaser.Scene {
     this.currentSlot = null;
     this.isGuardChecking = false;
     this.guardApproved = false;
+    this.dialogueInProgress = false;
     this.dialogueTimer = null;
+  }
+
+  updateGameState(action) {
+    const user = JSON.parse(localStorage.getItem("user")) || {};
+    switch (action.type) {
+        case "SET_FLAG":
+            if (!user.flags) user.flags = {};
+            user.flags[action.key] = action.value;
+            localStorage.setItem("user", JSON.stringify(user));
+            break;
+        case "GIVE_ITEM":
+            addItem(action.item);
+            break;
+    }
+  }
+
+  getDialogueNodeById(id) {
+    if (!this.activeNPC || !this.activeNPC.dialogueData) return null;
+    return this.activeNPC.dialogueData.dialogueNodes.find(n => n.id === id);
+  }
+
+  launchBubble(text) {
+      this.launchBubbleNode({ text: text });
+  }
+
+  launchBubbleNode(node) {
+      this.dialogueInProgress = true;
+      this.scene.launch("DialogueBubbleOverlay", {
+          dialogueNode: node,
+          npcName: this.activeNPC.isGuard ? "Guard" : "NPC",
+          callingScene: this,
+          activeNPC: this.activeNPC
+      });
   }
 
   drawBubble(arrowX = 0) {
@@ -579,9 +613,13 @@ export class SchoolScene extends Phaser.Scene {
           this.time.delayedCall(3000, () => {
             this.dialogueText.setText("The photo matches... and the encryption seems valid.");
             
-            this.time.delayedCall(2500, () => {
+            this.time.delayedCall(2500, async () => {
               this.dialogueText.setText("Alright, student. Everything is in order.");
               this.guardApproved = true;
+
+              // Give ID back
+              await addItem({ name: "School ID", icon: "SchoolIDItem" });
+              console.log("School ID returned to player.");
 
               this.time.delayedCall(2000, () => {
                 this.dialogueText.setText("You may pass. I'm going to take my break now.");

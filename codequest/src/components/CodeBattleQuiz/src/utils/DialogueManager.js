@@ -13,7 +13,7 @@ export const checkCondition = (condition, gameState) => {
     case 'LANGUAGE_IS':
       return gameState.language === value;
     case 'FLAG_EQUALS':
-      return gameState.flags?.[key] === value;
+      return (gameState.flags?.[key] ?? false) === value;
     case 'QUEST_STATUS':
       return gameState.quests?.[id] === status;
     case 'HAS_ITEM':

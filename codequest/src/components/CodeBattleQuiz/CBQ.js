@@ -29,6 +29,7 @@ import { SchoolIDOverlay } from "./src/overlay/SchoolIDOverlay.js";
 import { PickupOverlay } from "./src/overlay/PickupOverlay.js";
 import { GoalOverlay } from "./src/overlay/GoalOverlay.js";
 import { DialogueOverlay } from "./src/overlay/DialogueOverlay.js";
+import { DialogueBubbleOverlay } from "./src/overlay/DialogueBubbleOverlay.js";
 import { GuideOverlay } from "./src/overlay/GuideOverlay.js";
 
 // Boot Scene (handles loading with progress bar)
@@ -159,8 +160,9 @@ export default function CodeBattleQuiz() {
         dom: { createContainer: true },
         scene: [BootScene, Start, HomeScene, LivingRoomScene, OutsideScene, 
                 SchoolScene, SchoolLobbyScene, SaveSlotsScene, SchoolHallwayScene,
+                Comlab1Scene, Comlab2Scene, Comlab3Scene,
                  QuizGame , MenuScene, CodingGameScene, TaskOverlay,
-                HudOverlay, InventoryOverlay, GoalOverlay, Comlab1Scene, Comlab2Scene, Comlab3Scene, ClipboardOverlay, StatsOverlay, LeaderboardScene, TimerOverlayScene, SchoolIDOverlay, PickupOverlay, DialogueOverlay, GuideOverlay],
+                HudOverlay, InventoryOverlay, GoalOverlay, ClipboardOverlay, StatsOverlay, LeaderboardScene, TimerOverlayScene, SchoolIDOverlay, PickupOverlay, DialogueOverlay, DialogueBubbleOverlay, GuideOverlay],
         scale: { mode: Phaser.Scale.NONE, autoCenter: Phaser.Scale.CENTER_BOTH },
         backgroundColor: 0x000000,
         render: { pixelArt: true },

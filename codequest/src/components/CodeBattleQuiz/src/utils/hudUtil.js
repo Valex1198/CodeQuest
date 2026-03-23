@@ -53,6 +53,10 @@ export async function launchHUD(scene, player, saveSlot = 1, language = "Python"
 
     scene.scene.setVisible(true, "HudOverlay");
     scene.scene.bringToTop("HudOverlay");
+    scene.scene.bringToTop("InventoryOverlay");
+    scene.scene.bringToTop("GoalOverlay");
+    scene.scene.bringToTop("PickupOverlay");
+    scene.scene.bringToTop("SchoolIDOverlay");
 }
 export function getHUD(scene) {
     return scene.scene.get("HudOverlay");

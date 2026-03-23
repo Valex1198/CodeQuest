@@ -21,6 +21,12 @@ import tasksJSON from "../assets/codingTasks.json";
 import { showTaskCompletionOverlay } from "../utils/completeTaskUtil";
 import { submitCode as runCodeWithPiston } from "../utils/pistonApi.js";
 import { KeyboardManager } from "../utils/KeyboardManager.js";
+
+import Keysfx1 from "../assets/sounds/keysfx1.mp3";
+import Keysfx2 from "../assets/sounds/keysfx2.mp3";
+import Keysfx3 from "../assets/sounds/keysfx3.mp3";
+import Keysfx4 from "../assets/sounds/keysfx4.mp3";
+
 export class CodingGameScene extends Phaser.Scene {
   constructor() {
     super({ key: "CodingGameScene" });
@@ -48,6 +54,11 @@ export class CodingGameScene extends Phaser.Scene {
     this.load.image("codingArena", CodingGame);
     this.load.tilemapTiledJSON("codeGame", CodeGameMap);
     this.load.atlas("keyboard", KeyboardSpriteSheet, KeyboardJSON);
+
+    this.load.audio("keySound1", Keysfx1);
+    this.load.audio("keySound2", Keysfx2);
+    this.load.audio("keySound3", Keysfx3);
+    this.load.audio("keySound4", Keysfx4);
   }
 
   async create(data) {

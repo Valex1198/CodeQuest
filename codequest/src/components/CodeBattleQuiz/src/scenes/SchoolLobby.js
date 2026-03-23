@@ -19,7 +19,7 @@ import { launchHUD } from "../utils/hudUtil.js";
 import { createMenuButton } from "../utils/uiHelpers.js";
 import { getNPCDialogue, handleDialogueActions } from "../utils/DialogueManager";
 import { initNPCMovement, updateNPCMovement } from "../utils/NPCMovementManager";
-import { DialogueOverlay } from "../overlay/DialogueOverlay";
+import { DialogueBubbleOverlay } from "../overlay/DialogueBubbleOverlay";
 import { addItem } from "../utils/InventoryManager";
 
 export class SchoolLobbyScene extends Phaser.Scene {
@@ -291,8 +291,6 @@ export class SchoolLobbyScene extends Phaser.Scene {
 
       // Handle Interaction
       this.input.keyboard.on("keydown-E", () => {
-        if (this.dialogueInProgress) return;
-
         let nearestNPC = null;
         let minDist = 60;
 
@@ -305,6 +303,11 @@ export class SchoolLobbyScene extends Phaser.Scene {
         });
 
         if (nearestNPC) {
+            // Stop existing dialogue if any to allow immediate switch
+            if (this.scene.isActive("DialogueBubbleOverlay")) {
+                this.scene.stop("DialogueBubbleOverlay");
+            }
+
             this.activeNPC = nearestNPC;
             const storedUser = JSON.parse(localStorage.getItem("user")) || {};
             const gameState = { flags: storedUser.flags || {}, inventory: storedUser.inventory || [], user: storedUser, language: this.language };
@@ -313,10 +316,11 @@ export class SchoolLobbyScene extends Phaser.Scene {
 
             if (dialogueNode) {
                 this.dialogueInProgress = true;
-                this.scene.launch("DialogueOverlay", {
+                this.scene.launch("DialogueBubbleOverlay", {
                     dialogueNode: dialogueNode,
                     npcName: nearestNPC.npcName || "NPC",
-                    callingScene: this
+                    callingScene: this,
+                    activeNPC: nearestNPC
                 });
             }
         }

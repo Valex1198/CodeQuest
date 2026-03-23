@@ -6,6 +6,9 @@ export class KeyboardManager {
     this.baseX = x;
     this.baseY = y;
 
+    // Sound keys
+    this.soundKeys = ["keySound1", "keySound2", "keySound3", "keySound4"];
+
     // Map JS event.key/code to Atlas Tag Names
     this.keyMap = {
       "~": "~", "`": "~",
@@ -55,12 +58,10 @@ export class KeyboardManager {
     img.onload = () => {
       if (!this.scene || !this.scene.textures) return;
 
-      // Create two separate textures by splitting the large image in half
-      // This bypasses the WebGL 16384px limit
       const canvas1 = document.createElement("canvas");
       const canvas2 = document.createElement("canvas");
       
-      const mid = 32; // Split at 32 frames
+      const mid = 32; 
       canvas1.width = this.frameWidth * (mid + 1);
       canvas1.height = this.frameHeight;
       canvas2.width = this.frameWidth * (65 - mid - 1);
@@ -86,10 +87,21 @@ export class KeyboardManager {
     };
   }
 
+  playRandomSound() {
+    if (!this.scene || !this.scene.sound) return;
+    const randomIndex = Math.floor(Math.random() * this.soundKeys.length);
+    const key = this.soundKeys[randomIndex];
+    
+    if (this.scene.cache.audio.exists(key)) {
+      this.scene.sound.play(key, { volume: 0.5 });
+    }
+  }
+
   setupListeners() {
     this.activeKeys = new Set();
 
     this.onKeyDown = (e) => {
+      if (!this.sprite) return;
       let key = e.key;
       if (e.code === "ShiftRight") key = "Right Shift";
       if (e.code === "ShiftLeft") key = "Left Shift";
@@ -97,12 +109,16 @@ export class KeyboardManager {
       
       const tagName = this.keyMap[key] || this.keyMap[key.toLowerCase()] || null;
       if (tagName && this.tags[tagName] !== undefined) {
+        if (!this.activeKeys.has(tagName)) {
+           this.playRandomSound();
+        }
         this.activeKeys.add(tagName);
         this.setFrame(this.tags[tagName]);
       }
     };
 
     this.onKeyUp = (e) => {
+      if (!this.sprite) return;
       let key = e.key;
       if (e.code === "ShiftRight") key = "Right Shift";
       if (e.code === "ShiftLeft") key = "Left Shift";
@@ -116,13 +132,11 @@ export class KeyboardManager {
       if (this.activeKeys.size === 0) {
         this.setFrame(0);
       } else {
-        // Show the last pressed key still held down
         const lastKey = Array.from(this.activeKeys).pop();
         this.setFrame(this.tags[lastKey]);
       }
     };
 
-    // Use capture phase (true) to bypass stopPropagation in the code editor
     window.addEventListener("keydown", this.onKeyDown, true);
     window.addEventListener("keyup", this.onKeyUp, true);
 
@@ -130,7 +144,7 @@ export class KeyboardManager {
   }
 
   setFrame(index) {
-    if (!this.sprite) return;
+    if (!this.sprite || !this.sprite.scene) return;
     
     if (index <= this.splitPoint) {
       this.sprite.setTexture("kbd_part1");
@@ -144,6 +158,9 @@ export class KeyboardManager {
   destroy() {
     window.removeEventListener("keydown", this.onKeyDown, true);
     window.removeEventListener("keyup", this.onKeyUp, true);
-    if (this.sprite) this.sprite.destroy();
+    if (this.sprite) {
+      this.sprite.destroy();
+      this.sprite = null;
+    }
   }
 }
