@@ -55,6 +55,9 @@ export class PickupOverlay extends Phaser.Scene {
             return;
         }
 
+        // Bring to top to ensure it's visible over DialogueOverlay
+        this.scene.bringToTop();
+
         // Update content
         if (this.text) this.text.setText(`Picked up: ${name}`);
         

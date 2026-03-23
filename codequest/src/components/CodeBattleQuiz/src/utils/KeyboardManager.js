@@ -8,6 +8,7 @@ export class KeyboardManager {
 
     // Sound keys
     this.soundKeys = ["keySound1", "keySound2", "keySound3", "keySound4"];
+    this.lastSoundKey = null;
 
     // Map JS event.key/code to Atlas Tag Names
     this.keyMap = {
@@ -26,6 +27,9 @@ export class KeyboardManager {
       "a": "A", "s": "S", "d": "D", "f": "F", "g": "G", "h": "H", "j": "J", "k": "K", "l": "L",
       ";": ";", ":": ";", "\"": "'", "'": "'", "\\": "\\", "|": "\\",
       "Shift": "Left Shift",
+      "Right Shift": "Right Shift",
+      "Left Shift": "Left Shift",
+      "Right ALT": "RIGHT ALT",
       "z": "Z", "x": "X", "c": "C", "v": "V", "b": "B", "n": "N", "m": "M",
       ",": ",", "<": ",", ".": ".", ">": ".", "/": "/", "?": "/",
       "ArrowUp": "UP ",
@@ -89,11 +93,15 @@ export class KeyboardManager {
 
   playRandomSound() {
     if (!this.scene || !this.scene.sound) return;
-    const randomIndex = Math.floor(Math.random() * this.soundKeys.length);
-    const key = this.soundKeys[randomIndex];
+
+    // Filter out the last played sound to avoid repetition
+    const availableKeys = this.soundKeys.filter(k => k !== this.lastSoundKey);
+    const randomIndex = Math.floor(Math.random() * availableKeys.length);
+    const key = availableKeys[randomIndex];
     
-    if (this.scene.cache.audio.exists(key)) {
+    if (this.scene.cache.audio.has(key)) {
       this.scene.sound.play(key, { volume: 0.5 });
+      this.lastSoundKey = key;
     }
   }
 

@@ -19,11 +19,9 @@ export class DialogueBubbleOverlay extends Phaser.Scene {
     this.bubbleBg = this.add.graphics();
     this.dialogueText = this.add.text(0, 0, "", {
       fontSize: "12px",
-      fontFamily: '"Press Start 2P"',
       fill: "#ffffff",
       wordWrap: { width: 180 },
-      align: "center",
-      lineSpacing: 8
+      align: "center"
     }).setOrigin(0.5);
     this.bubbleContainer.add([this.bubbleBg, this.dialogueText]);
 
@@ -47,15 +45,15 @@ export class DialogueBubbleOverlay extends Phaser.Scene {
     const graphics = this.bubbleBg;
     graphics.clear();
     
-    // Aesthetic Dark Theme
-    graphics.fillStyle(0x000000, 0.85);
-    graphics.lineStyle(2, 0x444444, 1);
+    // Aesthetic Dark Theme with White Outline (Matching SchoolScene)
+    graphics.fillStyle(0x000000, 0.8);
+    graphics.lineStyle(2, 0xffffff, 1);
     
     const halfW = width / 2;
     const h = height;
     
-    graphics.fillRoundedRect(-halfW, -h, width, h, 8);
-    graphics.strokeRoundedRect(-halfW, -h, width, h, 8);
+    graphics.fillRoundedRect(-halfW, -h, width, h, 10);
+    graphics.strokeRoundedRect(-halfW, -h, width, h, 10);
     
     // Arrow
     const arrowSize = 10;
@@ -74,11 +72,11 @@ export class DialogueBubbleOverlay extends Phaser.Scene {
     const graphics = this.optionsBg;
     graphics.clear();
     
-    // Sleek Dark Gray with Subtle Border
-    graphics.fillStyle(0x111111, 0.95);
-    graphics.lineStyle(2, 0x666666, 1); 
+    // Sleek Dark Gray with White Border
+    graphics.fillStyle(0x111111, 0.9);
+    graphics.lineStyle(2, 0xffffff, 1); 
     
-    const skew = 12; // More pronounced tilt
+    const skew = 12; 
     const points = [
         { x: -width/2 + skew, y: 0 },
         { x: width/2 + skew, y: 0 },

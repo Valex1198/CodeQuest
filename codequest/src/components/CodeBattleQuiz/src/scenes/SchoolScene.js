@@ -20,7 +20,7 @@ import { setupCollisions } from "../utils/collision";
 import { setSave } from "../utils/saveManager";
 import { preloadSongUI, createSongUI } from "../utils/songUI";
 import { loadPlayer } from "../utils/playerLoader";
-import { launchHUD } from "../utils/hudUtil.js";
+import { launchHUD, showPickup } from "../utils/hudUtil.js";
 import { createMenuButton } from "../utils/uiHelpers.js";
 import { addItem, hasItem, removeItem, getInventory } from "../utils/InventoryManager.js";
 import { completeGoal } from "../utils/GoalManager";
@@ -47,6 +47,9 @@ export class SchoolScene extends Phaser.Scene {
             break;
         case "GIVE_ITEM":
             addItem(action.item);
+            if (action.item && action.item.name) {
+                showPickup(this, action.item.name, action.item.icon);
+            }
             break;
     }
   }

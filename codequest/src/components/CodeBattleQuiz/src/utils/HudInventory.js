@@ -143,21 +143,66 @@ export class InventoryOverlay extends Phaser.Scene {
                 break;
             
             case "Python Print Guide":
-                guideTitle = "Python Printing";
-                guideContent = "print(\"Hello, World!\")";
-                this.showGuide(guideTitle, guideContent);
+                this.showGuide("Python Printing", [
+                    {
+                        title: "Introduction",
+                        content: "The print() function is your first tool in Python.\n\nIt allows you to output text, numbers, and more to the console so you can see what your code is doing."
+                    },
+                    {
+                        title: "Basic Syntax",
+                        content: "To use it, simply write 'print' followed by parentheses:\n\nprint(\"Hello!\")\n\nThe text inside must be in quotes!"
+                    },
+                    {
+                        title: "Multi-Print",
+                        content: "You can print multiple items by separating them with commas:\n\nprint(\"Score:\", 100)\n\nPython will automatically add a space between them!"
+                    },
+                    {
+                        title: "Common Errors",
+                        content: "1. Missing quotes: print(Hello) will fail because Python thinks Hello is a variable.\n\n2. Missing parens: In Python 3, print \"Hello\" is an error."
+                    }
+                ]);
                 break;
 
             case "Java Print Guide":
-                guideTitle = "Java Printing";
-                guideContent = "System.out.println(\"Hello, World!\");";
-                this.showGuide(guideTitle, guideContent);
+                this.showGuide("Java Printing", [
+                    {
+                        title: "Overview",
+                        content: "In Java, printing is a bit more verbose. We use the System class to talk to the console."
+                    },
+                    {
+                        title: "Syntax",
+                        content: "The command is:\n\nSystem.out.println(\"Hello!\");\n\nDon't forget the semicolon (;) at the end!"
+                    },
+                    {
+                        title: "ln vs print",
+                        content: "println adds a new line at the end.\n\nprint stays on the same line for the next output."
+                    },
+                    {
+                        title: "Common Errors",
+                        content: "1. Case Sensitivity: 'system' with a lowercase 's' will not work.\n\n2. Quotes: Always use double quotes (\") for text strings."
+                    }
+                ]);
                 break;
 
             case "C++ Print Guide":
-                guideTitle = "C++ Printing";
-                guideContent = "#include <iostream>\n\nint main() {\n  std::cout << \"Hello, World!\" << std::endl;\n  return 0;\n}";
-                this.showGuide(guideTitle, guideContent);
+                this.showGuide("C++ Printing", [
+                    {
+                        title: "Standard I/O",
+                        content: "C++ uses 'streams' for input and output. We use 'cout' (Console Out)."
+                    },
+                    {
+                        title: "Basic Use",
+                        content: "You'll need:\n\n#include <iostream>\n\nstd::cout << \"Hello!\" << std::endl;\n\nThe << operator 'pushes' data to the stream."
+                    },
+                    {
+                        title: "Namespace",
+                        content: "Using 'std::' tells C++ we want the standard version. 'endl' adds a new line and flushes the buffer!"
+                    },
+                    {
+                        title: "Common Errors",
+                        content: "1. Missing Header: Without #include <iostream>, cout won't exist.\n\n2. Wrong Arrow: Always use << for output, never >>."
+                    }
+                ]);
                 break;
         }
     }

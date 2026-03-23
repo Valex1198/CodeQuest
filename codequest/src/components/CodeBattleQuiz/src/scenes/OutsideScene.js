@@ -36,15 +36,13 @@ export class OutsideScene extends Phaser.Scene {
     graphics.clear();
     graphics.fillStyle(0x000000, 0.8);
     graphics.lineStyle(2, 0xffffff, 1);
-    
-    // Bubble rectangle
+
     graphics.fillRoundedRect(-100, -60, 200, 60, 10);
     graphics.strokeRoundedRect(-100, -60, 200, 60, 10);
-    
-    // Arrow (Triangle)
+
     const arrowSize = 10;
     const clampedArrowX = Phaser.Math.Clamp(arrowX, -90, 90);
-    
+
     graphics.beginPath();
     graphics.moveTo(clampedArrowX - arrowSize, 0);
     graphics.lineTo(clampedArrowX + arrowSize, 0);

@@ -15,7 +15,7 @@ import { setupCollisions } from "../utils/collision";
 import { setSave } from "../utils/saveManager";
 import { preloadSongUI, createSongUI } from "../utils/songUI";
 import { loadPlayer } from "../utils/playerLoader";
-import { launchHUD } from "../utils/hudUtil.js";
+import { launchHUD, showPickup } from "../utils/hudUtil.js";
 import { createMenuButton } from "../utils/uiHelpers.js";
 import { getNPCDialogue, handleDialogueActions } from "../utils/DialogueManager";
 import { initNPCMovement, updateNPCMovement } from "../utils/NPCMovementManager";
@@ -55,6 +55,10 @@ export class SchoolLobbyScene extends Phaser.Scene {
         case "GIVE_ITEM":
             addItem(action.item); // This should update localStorage internally
             itemGiven = true;
+            // NEW: Show pickup notification
+            if (action.item && action.item.name) {
+                showPickup(this, action.item.name, action.item.icon);
+            }
             break; // No need to save localStorage again, addItem does it.
     }
     if (!itemGiven) {
