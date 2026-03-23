@@ -127,51 +127,21 @@ export class InventoryOverlay extends Phaser.Scene {
 
         const itemName = typeof item === 'string' ? item : (item.name || "");
         
-        let guideTitle = "";
-        let guideContent = "";
-
-        switch(itemName) {
-            case "School ID":
-                this.toggleInventory();
-                if (!this.scene.isActive("SchoolIDOverlay")) {
-                    this.scene.launch("SchoolIDOverlay");
-                }
-                const schoolIDScene = this.scene.get("SchoolIDOverlay");
-                if (schoolIDScene) {
-                    schoolIDScene.toggleID();
-                }
-                break;
+        if (itemName === "School ID") {
+            // Close inventory first
+            this.toggleInventory();
             
-            case "Python Print Guide":
-                guideTitle = "Python Printing";
-                guideContent = "print(\"Hello, World!\")";
-                this.showGuide(guideTitle, guideContent);
-                break;
-
-            case "Java Print Guide":
-                guideTitle = "Java Printing";
-                guideContent = "System.out.println(\"Hello, World!\");";
-                this.showGuide(guideTitle, guideContent);
-                break;
-
-            case "C++ Print Guide":
-                guideTitle = "C++ Printing";
-                guideContent = "#include <iostream>\n\nint main() {\n  std::cout << \"Hello, World!\" << std::endl;\n  return 0;\n}";
-                this.showGuide(guideTitle, guideContent);
-                break;
+            // Ensure scene is launched
+            if (!this.scene.isActive("SchoolIDOverlay")) {
+                this.scene.launch("SchoolIDOverlay");
+            }
+            
+            // Launch/Toggle SchoolIDOverlay
+            const schoolIDScene = this.scene.get("SchoolIDOverlay");
+            if (schoolIDScene) {
+                schoolIDScene.toggleID();
+            }
         }
-    }
-
-    showGuide(title, content) {
-        this.toggleInventory(); // Close inventory
-        
-        const callingScene = this.scene.manager.getScenes(true).find(scene => scene.scene.key !== this.scene.key);
-
-        this.scene.launch("GuideOverlay", {
-            title: title,
-            content: content,
-            callingScene: callingScene || this
-        });
     }
 
     drawBagBg(color, alpha, lineColor) {
@@ -195,23 +165,18 @@ export class InventoryOverlay extends Phaser.Scene {
         this.inventoryContainer.setVisible(isVisible);
         
         if (isVisible) {
-            this.refreshInventory();
+            const items = getInventory();
+            this.slots.forEach((slot, index) => {
+                const item = items[index];
+                if (item) {
+                    const name = typeof item === 'string' ? item : (item.name || "Item");
+                    slot.text.setText(name);
+                    this.drawSlot(slot.bg, slot.x, slot.y, slot.size, true);
+                } else {
+                    slot.text.setText("");
+                    this.drawSlot(slot.bg, slot.x, slot.y, slot.size, false);
+                }
+            });
         }
-    }
-
-    refreshInventory() {
-        const items = getInventory();
-        if (!this.slots) return;
-        this.slots.forEach((slot, index) => {
-            const item = items[index];
-            if (item) {
-                const name = typeof item === 'string' ? item : (item.name || "Item");
-                slot.text.setText(name);
-                this.drawSlot(slot.bg, slot.x, slot.y, slot.size, true);
-            } else {
-                slot.text.setText("");
-                this.drawSlot(slot.bg, slot.x, slot.y, slot.size, false);
-            }
-        });
     }
 }

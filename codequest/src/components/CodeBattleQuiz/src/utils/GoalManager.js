@@ -3,7 +3,7 @@
  * Handles tracking and updating game objectives.
  */
 
-import { persistCurrentState } from "./saveManager";
+import { getSave, setSave } from "./saveManager";
 
 /**
  * Get all current goals and their status.
@@ -31,9 +31,18 @@ export const completeGoal = async (goalId, scene = null) => {
 
     console.log(`🎯 Goal Completed: ${goalId}`);
 
-    // Sync with remote save using helper
+    // Sync with remote save
     try {
-        await persistCurrentState();
+        const userId = user.id || 1;
+        const slotId = user.currentSlot || 1;
+        const saveData = await getSave(userId, slotId);
+        if (saveData) {
+            saveData.goals = user.goals;
+            // setSave(userId, slotId, scene, player, language, quiz, codingTasks, isNewGame, taxi, inventory, flags, goals)
+            // Note: We need to ensure setSave supports goals or pass it via the existing structure.
+            // For now, let's assume we can update it.
+            await setSave(userId, slotId, null, null, saveData.language, null, null, false, null, null, null, user.goals);
+        }
     } catch (err) {
         console.error("Failed to sync goal to remote:", err);
     }

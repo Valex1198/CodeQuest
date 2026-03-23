@@ -11,8 +11,6 @@ export class KeyboardManager {
       "~": "~", "`": "~",
       "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
       "6": "6", "7": "7", "8": "8", "9": "9", "0": "0",
-      "!": "1", "@": "2", "#": "3", "$": "4", "%": "5",
-      "^": "6", "&": "7", "*": "8", "(": "9", ")": "0",
       "-": "-", "_": "-", "=": "=/+", "+": "=/+",
       "Backspace": "Backspace",
       "Tab": "Tab",
@@ -53,8 +51,6 @@ export class KeyboardManager {
     const img = new Image();
     img.src = imageUrl;
     img.onload = () => {
-      if (!this.scene || !this.scene.textures) return;
-
       // Create two separate textures by splitting the large image in half
       // This bypasses the WebGL 16384px limit
       const canvas1 = document.createElement("canvas");
@@ -71,9 +67,6 @@ export class KeyboardManager {
 
       ctx1.drawImage(img, 0, 0, canvas1.width, this.frameHeight, 0, 0, canvas1.width, this.frameHeight);
       ctx2.drawImage(img, canvas1.width, 0, canvas2.width, this.frameHeight, 0, 0, canvas2.width, this.frameHeight);
-
-      if (this.scene.textures.exists("kbd_part1")) this.scene.textures.remove("kbd_part1");
-      if (this.scene.textures.exists("kbd_part2")) this.scene.textures.remove("kbd_part2");
 
       this.scene.textures.addSpriteSheet("kbd_part1", canvas1, { frameWidth: this.frameWidth, frameHeight: this.frameHeight });
       this.scene.textures.addSpriteSheet("kbd_part2", canvas2, { frameWidth: this.frameWidth, frameHeight: this.frameHeight });

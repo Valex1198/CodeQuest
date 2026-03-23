@@ -77,32 +77,6 @@ export async function clearSave(userId, slotId) {
 }
 
 // --------------------------------------------------
-// PERSIST CURRENT STATE FROM LOCALSTORAGE
-// --------------------------------------------------
-export async function persistCurrentState() {
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  if (!user.id) return;
-
-  const slotId = user.currentSlot || 1;
-  
-  // setSave(userId, slotId, scene, player, language, quiz, codingTasks, isNewGame, taxi, inventory, flags, goals)
-  await setSave(
-    user.id,
-    slotId,
-    null, // Don't overwrite scene
-    null, // Don't overwrite player position
-    user.language || "Python",
-    user.quiz || null,
-    user.codingTasks || null,
-    false,
-    user.taxi || null,
-    user.inventory || [],
-    user.flags || {},
-    user.goals || {}
-  );
-}
-
-// --------------------------------------------------
 // SET SAVE
 // --------------------------------------------------
 export async function setSave(
@@ -146,12 +120,7 @@ export async function setSave(
   }
 
   saveData.date = formattedDate;
-
-  // Only set/update language if it's a new game or if no language is currently set.
-  // This ensures the language for a save slot remains permanent once established.
-  if (isNewGame || !saveData.language) {
-    saveData.language = language;
-  }
+  saveData.language = language;
 
   // Reset progress and taxi if isNewGame
   if (isNewGame) {

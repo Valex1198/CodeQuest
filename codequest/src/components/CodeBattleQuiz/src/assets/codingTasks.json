@@ -2,79 +2,307 @@
   "Python": {
     "1": {
       "title": "Hello World",
-      "description": "Print 'Hello, World!' to the console.",
-      "testCases": [
-        { "input": "", "output": "Hello, World!", "hidden": false }
-      ],
-      "hint": "Use print('Hello, World!')",
-      "condition": { "mustUse": ["print"] }
+      "description": "Write a Python program that prints 'Hello, World!'",
+      "sampleInput": "",
+      "sampleOutput": "Hello, World!",
+      "hint": "Use the print() function.",
+      "condition": {
+        "mustUse": ["print"]
+      }
     },
     "2": {
-      "title": "Dynamic Addition",
-      "description": "Read two integers from input (one per line) and print their sum.",
-      "testCases": [
-        { "input": "3 5", "output": "8", "hidden": false }
-      ],
-      "hint": "Use input() and int(). Remember to print the sum.",
-      "condition": { "mustUse": ["int", "input", "print", "+"] }
+      "title": "Sum Two Numbers",
+      "description": "Write a Python program that sums 3 and 5 and prints the result.",
+      "sampleInput": "",
+      "sampleOutput": "8",
+      "hint": "Use addition and print the result.",
+      "condition": {
+        "mustUse": ["+"]
+      }
     },
     "3": {
-      "title": "Even or Odd",
-      "description": "Read a number from input and print 'Even' if it's even, or 'Odd' if it's odd.",
-      "testCases": [
-        { "input": "2", "output": "Even", "hidden": false }
-      ],
-      "hint": "Use the modulo operator (%) and if/else.",
-      "condition": { "mustUse": ["%", "if"] }
+      "title": "Sum of Even Numbers",
+      "description": "Write a Python program that sums all even numbers from 1 to 10 and prints the result.",
+      "sampleInput": "",
+      "sampleOutput": "30",
+      "hint": "Use a for loop and the modulo (%) operator to check for even numbers.",
+      "condition": {
+        "mustUse": ["for", "%"]
+      }
     },
     "4": {
-      "title": "Square Loop",
-      "description": "Read a number N and print the squares of all numbers from 1 to N, each on a new line.",
-      "testCases": [
-        { "input": "3", "output": "1 4 9", "hidden": false }
-      ],
-      "hint": "Use range(1, N+1) and a for loop.",
-      "condition": { "mustUse": ["for", "range"] }
+      "title": "Multiplication Table",
+      "description": "Print the multiplication table of 5 from 1 to 5.",
+      "sampleInput": "",
+      "sampleOutput": "5\n10\n15\n20\n25",
+      "hint": "Use a for loop and multiplication.",
+      "condition": {
+        "mustUse": ["for", "*"]
+      }
+    },
+    "5": {
+      "title": "Check Even or Odd",
+      "description": "Check if 7 is even or odd and print 'Even' or 'Odd'.",
+      "sampleInput": "",
+      "sampleOutput": "Odd",
+      "hint": "Use the modulo operator (%) and an if statement.",
+      "condition": {
+        "mustUse": ["%", "if"]
+      }
+    },
+    "6": {
+      "title": "Factorial of 4",
+      "description": "Print the factorial of 4.",
+      "sampleInput": "",
+      "sampleOutput": "24",
+      "hint": "Use a loop or recursion.",
+      "condition": {
+        "mustUse": ["for", "*"]
+      }
+    },
+    "7": {
+      "title": "Sum of List",
+      "description": "Sum all numbers in the list [1, 2, 3, 4, 5] and print the result.",
+      "sampleInput": "",
+      "sampleOutput": "15",
+      "hint": "Use a loop or sum() function.",
+      "condition": {
+        "mustUse": ["for", "sum"]
+      }
+    },
+    "8": {
+      "title": "Print Squares",
+      "description": "Print squares of numbers from 1 to 5, one per line.",
+      "sampleInput": "",
+      "sampleOutput": "1\n4\n9\n16\n25",
+      "hint": "Use a for loop and exponentiation (**).",
+      "condition": {
+        "mustUse": ["for", "**"]
+      }
+    },
+    "9": {
+      "title": "Reverse String",
+      "description": "Print 'Python' reversed.",
+      "sampleInput": "",
+      "sampleOutput": "nohtyP",
+      "hint": "Use slicing or a loop.",
+      "condition": {
+        "mustUse": ["[::-1]"]
+      }
+    },
+    "10": {
+      "title": "Simple Function",
+      "description": "Define a function that returns the square of 6 and print the result.",
+      "sampleInput": "",
+      "sampleOutput": "36",
+      "hint": "Define a function using def and return the square.",
+      "condition": {
+        "mustUse": ["def", "*"]
+      }
     }
   },
   "Java": {
     "1": {
       "title": "Hello World",
-      "description": "Print 'Hello, World!' to the console.",
-      "testCases": [
-        { "input": "", "output": "Hello, World!", "hidden": false }
-      ],
+      "description": "Write a Java program that prints 'Hello, World!'",
+      "sampleInput": "",
+      "sampleOutput": "Hello, World!",
       "hint": "Use System.out.println()",
-      "condition": { "mustUse": ["System.out.println"] }
+      "condition": {
+        "mustUse": ["System.out.println"]
+      }
     },
     "2": {
-      "title": "Scanner Addition",
-      "description": "Use a Scanner to read two integers and print their sum.",
-      "testCases": [
-        { "input": "4 6", "output": "10", "hidden": false }
-      ],
-      "hint": "Use scanner.nextInt() twice.",
-      "condition": { "mustUse": ["Scanner", "nextInt"] }
+      "title": "Sum Two Numbers",
+      "description": "Write a Java program that sums 3 and 5 and prints the result.",
+      "sampleInput": "",
+      "sampleOutput": "8",
+      "hint": "Use addition and System.out.println().",
+      "condition": {
+        "mustUse": ["+"]
+      }
+    },
+    "3": {
+      "title": "Sum of Even Numbers",
+      "description": "Sum all even numbers from 1 to 10 and print the result.",
+      "sampleInput": "",
+      "sampleOutput": "30",
+      "hint": "Use a for loop and modulo (%) operator.",
+      "condition": {
+        "mustUse": ["for", "%"]
+      }
+    },
+    "4": {
+      "title": "Multiplication Table",
+      "description": "Print the multiplication table of 5 from 1 to 5.",
+      "sampleInput": "",
+      "sampleOutput": "5\n10\n15\n20\n25",
+      "hint": "Use a for loop and multiplication.",
+      "condition": {
+        "mustUse": ["for", "*"]
+      }
+    },
+    "5": {
+      "title": "Check Even or Odd",
+      "description": "Check if 7 is even or odd and print 'Even' or 'Odd'.",
+      "sampleInput": "",
+      "sampleOutput": "Odd",
+      "hint": "Use % and if-else statements.",
+      "condition": {
+        "mustUse": ["%", "if"]
+      }
+    },
+    "6": {
+      "title": "Factorial of 4",
+      "description": "Print the factorial of 4.",
+      "sampleInput": "",
+      "sampleOutput": "24",
+      "hint": "Use a for loop.",
+      "condition": {
+        "mustUse": ["for", "*"]
+      }
+    },
+    "7": {
+      "title": "Sum of Array",
+      "description": "Sum all numbers in the array {1,2,3,4,5} and print the result.",
+      "sampleInput": "",
+      "sampleOutput": "15",
+      "hint": "Use a for loop.",
+      "condition": {
+        "mustUse": ["for", "+"]
+      }
+    },
+    "8": {
+      "title": "Print Squares",
+      "description": "Print squares of numbers from 1 to 5, one per line.",
+      "sampleInput": "",
+      "sampleOutput": "1\n4\n9\n16\n25",
+      "hint": "Use a for loop and multiplication.",
+      "condition": {
+        "mustUse": ["for", "*"]
+      }
+    },
+    "9": {
+      "title": "Reverse String",
+      "description": "Print 'Java' reversed.",
+      "sampleInput": "",
+      "sampleOutput": "avaJ",
+      "hint": "Use StringBuilder and reverse().",
+      "condition": {
+        "mustUse": ["StringBuilder", "reverse"]
+      }
+    },
+    "10": {
+      "title": "Simple Function",
+      "description": "Define a method that returns square of 6 and print the result.",
+      "sampleInput": "",
+      "sampleOutput": "36",
+      "hint": "Define a method and call it from main.",
+      "condition": {
+        "mustUse": ["int", "*"]
+      }
     }
   },
   "C++": {
     "1": {
       "title": "Hello World",
-      "description": "Print 'Hello, World!' to the console.",
-      "testCases": [
-        { "input": "", "output": "Hello, World!", "hidden": false }
-      ],
-      "hint": "Use std::cout << 'Hello, World!' << std::endl;",
-      "condition": { "mustUse": ["cout"] }
+      "description": "Write a C++ program that prints 'Hello, World!'",
+      "sampleInput": "",
+      "sampleOutput": "Hello, World!",
+      "hint": "Use std::cout",
+      "condition": {
+        "mustUse": ["cout"]
+      }
     },
     "2": {
-      "title": "Cin Addition",
-      "description": "Read two integers using cin and print their sum.",
-      "testCases": [
-        { "input": "5 7", "output": "12", "hidden": false }
-      ],
-      "hint": "Use cin >> a >> b;",
-      "condition": { "mustUse": ["cin", "+"] }
+      "title": "Sum Two Numbers",
+      "description": "Write a C++ program that sums 3 and 5 and prints the result.",
+      "sampleInput": "",
+      "sampleOutput": "8",
+      "hint": "Use addition and cout.",
+      "condition": {
+        "mustUse": ["+"]
+      }
+    },
+    "3": {
+      "title": "Sum of Even Numbers",
+      "description": "Sum all even numbers from 1 to 10 and print the result.",
+      "sampleInput": "",
+      "sampleOutput": "30",
+      "hint": "Use a for loop and modulo operator.",
+      "condition": {
+        "mustUse": ["for", "%"]
+      }
+    },
+    "4": {
+      "title": "Multiplication Table",
+      "description": "Print the multiplication table of 5 from 1 to 5.",
+      "sampleInput": "",
+      "sampleOutput": "5\n10\n15\n20\n25",
+      "hint": "Use a for loop and multiplication.",
+      "condition": {
+        "mustUse": ["for", "*"]
+      }
+    },
+    "5": {
+      "title": "Check Even or Odd",
+      "description": "Check if 7 is even or odd and print 'Even' or 'Odd'.",
+      "sampleInput": "",
+      "sampleOutput": "Odd",
+      "hint": "Use % and if statement.",
+      "condition": {
+        "mustUse": ["%", "if"]
+      }
+    },
+    "6": {
+      "title": "Factorial of 4",
+      "description": "Print the factorial of 4.",
+      "sampleInput": "",
+      "sampleOutput": "24",
+      "hint": "Use a for loop.",
+      "condition": {
+        "mustUse": ["for", "*"]
+      }
+    },
+    "7": {
+      "title": "Sum of Array",
+      "description": "Sum all numbers in the array {1,2,3,4,5} and print the result.",
+      "sampleInput": "",
+      "sampleOutput": "15",
+      "hint": "Use a for loop.",
+      "condition": {
+        "mustUse": ["for", "+"]
+      }
+    },
+    "8": {
+      "title": "Print Squares",
+      "description": "Print squares of numbers from 1 to 5, one per line.",
+      "sampleInput": "",
+      "sampleOutput": "1\n4\n9\n16\n25",
+      "hint": "Use a for loop and multiplication.",
+      "condition": {
+        "mustUse": ["for", "*"]
+      }
+    },
+    "9": {
+      "title": "Reverse String",
+      "description": "Print 'C++' reversed.",
+      "sampleInput": "",
+      "sampleOutput": "++C",
+      "hint": "Use a loop or std::reverse.",
+      "condition": {
+        "mustUse": ["reverse"]
+      }
+    },
+    "10": {
+      "title": "Simple Function",
+      "description": "Define a function that returns square of 6 and print the result.",
+      "sampleInput": "",
+      "sampleOutput": "36",
+      "hint": "Define a function and call it from main.",
+      "condition": {
+        "mustUse": ["*", "int"]
+      }
     }
   }
 }
